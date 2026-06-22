@@ -30,6 +30,14 @@ Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
 });
 
+// Email verification and password reset routes (public)
+Route::prefix('auth')->group(function () {
+    Route::post('/verify-email', [UserController::class, 'verifyEmail']);
+    Route::post('/request-password-reset', [UserController::class, 'requestPasswordReset']);
+    Route::post('/reset-password', [UserController::class, 'resetPassword']);
+    Route::post('/resend-verification-email', [UserController::class, 'resendVerificationEmail']);
+});
+
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     // Auth routes

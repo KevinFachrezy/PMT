@@ -58,7 +58,9 @@ const CreateUserModal = ({ isOpen, onClose, onSuccess }) => {
     try {
       setLoading(true)
       await userService.create(formData)
-      toast.success('User created successfully')
+      toast.success('User created! Verification email sent to ' + formData.email, {
+        duration: 5000,
+      })
       setFormData(initialFormData)
       onSuccess()
     } catch (error) {

@@ -51,6 +51,16 @@ class AuthController extends Controller
             ]);
         }
 
+        // Check if email is verified
+        if (!$user->isEmailVerified()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please verify your email address before logging in.',
+                'unverified' => true,
+                'email' => $user->email,
+            ], 403);
+        }
+
         $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([

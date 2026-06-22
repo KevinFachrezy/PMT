@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\VerifyEmailMail;
+use App\Mail\ResetPasswordMail;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
@@ -47,9 +50,20 @@ class UserController extends Controller
             'is_active' => $validated['is_active'] ?? true,
         ]);
 
+        // Generate email verification token
+        $token = $user->generateEmailVerificationToken();
+        
+        // Send verification email
+        $verificationLink = env('FRONTEND_URL') . '/verify-email?token=' . $token . '&email=' . urlencode($user->email);
+        try {
+            Mail::to($user->email)->send(new VerifyEmailMail($user, $verificationLink));
+        } catch (\Exception $e) {
+            \Log::error('Failed to send verification email: ' . $e->getMessage());
+        }
+
         return response()->json([
             'success' => true,
-            'message' => 'User created successfully',
+            'message' => 'User created successfully. Verification email has been sent.',
             'data' => $user,
         ], 201);
     }
@@ -267,6 +281,141 @@ class UserController extends Controller
                 'managers' => $managers,
                 'handlers' => $handlers,
             ],
+        ]);
+    }
+
+    /**
+     * Verify email with token
+     */
+    public function verifyEmail(Request $request)
+    {
+        $validated = $request->validate([
+            'token' => 'required|string',
+            'email' => 'required|email',
+        ]);
+
+        $user = User::where('email', $validated['email'])->first();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found',
+            ], 404);
+        }
+
+        if ($user->isEmailVerified()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email is already verified',
+            ], 400);
+        }
+
+        if ($user->verifyEmail($validated['token'])) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Email verified successfully. You can now log in.',
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid or expired verification token',
+        ], 400);
+    }
+
+    /**
+     * Request password reset email
+     */
+    public function requestPasswordReset(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email|exists:users,email',
+        ]);
+
+        $user = User::where('email', $validated['email'])->first();
+
+        // Generate password reset token
+        $token = $user->generatePasswordResetToken();
+        
+        // Send password reset email
+        $resetLink = env('FRONTEND_URL') . '/reset-password?token=' . $token . '&email=' . urlencode($user->email);
+        try {
+            Mail::to($user->email)->send(new ResetPasswordMail($user, $resetLink));
+        } catch (\Exception $e) {
+            \Log::error('Failed to send password reset email: ' . $e->getMessage());
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password reset link has been sent to your email',
+        ]);
+    }
+
+    /**
+     * Reset password with token
+     */
+    public function resetPassword(Request $request)
+    {
+        $validated = $request->validate([
+            'token' => 'required|string',
+            'email' => 'required|email',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $user = User::where('email', $validated['email'])->first();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found',
+            ], 404);
+        }
+
+        if ($user->resetPasswordWithToken($validated['token'], $validated['password'])) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Password reset successfully. You can now log in with your new password.',
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid or expired password reset token',
+        ], 400);
+    }
+
+    /**
+     * Resend verification email
+     */
+    public function resendVerificationEmail(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email|exists:users,email',
+        ]);
+
+        $user = User::where('email', $validated['email'])->first();
+
+        if ($user->isEmailVerified()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Email is already verified',
+            ], 400);
+        }
+
+        // Generate new token
+        $token = $user->generateEmailVerificationToken();
+        
+        // Send verification email
+        $verificationLink = env('FRONTEND_URL') . '/verify-email?token=' . $token . '&email=' . urlencode($user->email);
+        try {
+            Mail::to($user->email)->send(new VerifyEmailMail($user, $verificationLink));
+        } catch (\Exception $e) {
+            \Log::error('Failed to send verification email: ' . $e->getMessage());
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Verification email has been resent',
         ]);
     }
 }

@@ -283,6 +283,35 @@ export const userService = {
     const response = await apiClient.delete(`/users/${id}`)
     return response.data
   },
+
+  // Verify email
+  verifyEmail: async (token, email) => {
+    const response = await apiClient.post('/auth/verify-email', { token, email })
+    return response.data
+  },
+
+  // Request password reset
+  requestPasswordReset: async (email) => {
+    const response = await apiClient.post('/auth/request-password-reset', { email })
+    return response.data
+  },
+
+  // Reset password
+  resetPassword: async (token, email, password, password_confirmation) => {
+    const response = await apiClient.post('/auth/reset-password', {
+      token,
+      email,
+      password,
+      password_confirmation,
+    })
+    return response.data
+  },
+
+  // Resend verification email
+  resendVerificationEmail: async (email) => {
+    const response = await apiClient.post('/auth/resend-verification-email', { email })
+    return response.data
+  },
 }
 
 // Analytics service
