@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // Email verification token untuk verification link
+            // Email verification token for verification link
             $table->string('email_verification_token')->nullable()->unique()->after('email');
             
-            // Password reset token untuk reset password link
+            // Password reset token for reset password link
             $table->string('password_reset_token')->nullable()->unique()->after('password');
             
-            // Expires at untuk token expiration (24 jam)
+            // Expires at token expiration (24 hour)
             $table->timestamp('token_expires_at')->nullable()->after('password_reset_token');
         });
     }
