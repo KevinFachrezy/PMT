@@ -67,7 +67,7 @@ class ProjectController extends Controller
         $query = Project::with(['manager', 'client', 'handlers', 'tasks', 'documents']);
 
         // Project handlers can only see projects they are involved in
-        // Involved means: selected as project handler (client_id) OR assigned to any task in the project
+        // Involved means: selected as project handler OR assigned to any task in the project
         if ($user->role !== 'manager') {
             $query->where(function ($q) use ($user) {
                 $q->where('client_id', $user->id)
