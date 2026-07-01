@@ -406,7 +406,7 @@ const DocumentCenter = () => {
 
                   <div className="flex flex-wrap gap-3">
                     {/* Proposal generator button — only in REPORT or Admin */}
-                    {(activeFolder === 'REPORT' || activeFolder === 'Admin') && (
+                    {(activeFolder === 'REPORT') && (
                       <button
                         onClick={() => setShowGenerateProposal(true)}
                         className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-bold px-6 py-3 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl"
