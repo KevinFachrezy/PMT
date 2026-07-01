@@ -47,7 +47,7 @@ const ProjectView = () => {
     if (!value) return '-'
     const parsedDate = new Date(value)
     if (Number.isNaN(parsedDate.getTime())) return '-'
-    return parsedDate.toLocaleDateString('id-ID', {
+    return parsedDate.toLocaleDateString('en-EN', {
       weekday: 'long',
       day: '2-digit',
       month: 'long',
@@ -155,7 +155,7 @@ const ProjectView = () => {
   }
 
   const handleTaskUpdate = (updatedTask) => {
-    setTasks(prevTasks => 
+    setTasks(prevTasks =>
       prevTasks.map(task => task.id === updatedTask.id ? updatedTask : task)
     )
   }
@@ -279,10 +279,9 @@ const ProjectView = () => {
           // Only open modal if it wasn't a drag
           if (!isDragging) handleTaskClick(task)
         }}
-        className={`rounded-lg p-4 cursor-grab active:cursor-grabbing transition-all mb-3 flex items-center justify-between group select-none hover:brightness-95 ${
-          isDragging ? 'opacity-30' : ''
-        } ${String(highlightedTaskId) === String(task.id) ? 'ring-4 ring-amber-300 animate-pulse' : ''
-        }`}
+        className={`rounded-lg p-4 cursor-grab active:cursor-grabbing transition-all mb-3 flex items-center justify-between group select-none hover:brightness-95 ${isDragging ? 'opacity-30' : ''
+          } ${String(highlightedTaskId) === String(task.id) ? 'ring-4 ring-amber-300 animate-pulse' : ''
+          }`}
         style={{
           ...style,
           backgroundColor: getPriorityBackgroundColor(task.priority),
@@ -303,9 +302,8 @@ const ProjectView = () => {
     return (
       <div className="flex-1 min-w-[300px]">
         <div
-          className={`bg-white rounded-lg border-2 overflow-hidden transition-colors ${
-            isOver ? 'border-orange-400 bg-orange-50' : 'border-orange-600'
-          }`}
+          className={`bg-white rounded-lg border-2 overflow-hidden transition-colors ${isOver ? 'border-orange-400 bg-orange-50' : 'border-orange-600'
+            }`}
         >
           <div className="bg-gray-100 px-4 py-3 border-b-2 border-orange-600">
             <div className="flex items-center space-x-2">
@@ -319,9 +317,8 @@ const ProjectView = () => {
               <DraggableTaskCard key={task.id} task={task} />
             ))}
             {tasks.length === 0 && (
-              <div className={`flex items-center justify-center h-full min-h-[120px] rounded-lg border-2 border-dashed transition-colors ${
-                isOver ? 'border-orange-400 bg-orange-50' : 'border-gray-200'
-              }`}>
+              <div className={`flex items-center justify-center h-full min-h-[120px] rounded-lg border-2 border-dashed transition-colors ${isOver ? 'border-orange-400 bg-orange-50' : 'border-gray-200'
+                }`}>
                 <p className="text-gray-400 text-sm">
                   {isOver ? 'Drop here' : 'No tasks'}
                 </p>
@@ -375,10 +372,10 @@ const ProjectView = () => {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
-      
+
       <div className="flex-1 ml-64">
         <Header />
-        
+
         <div className="p-8">
           {/* Project Header */}
           <div className="mb-6">
@@ -400,15 +397,14 @@ const ProjectView = () => {
                   Due Date: {formatProjectDate(project.due_date)}
                 </p>
                 <div className="mt-3">
-                  <span className={`inline-block px-3 py-1 text-xs font-bold rounded-full uppercase tracking-wide ${
-                    project.status === 'completed'
+                  <span className={`inline-block px-3 py-1 text-xs font-bold rounded-full uppercase tracking-wide ${project.status === 'completed'
                       ? 'bg-green-100 text-green-700 border border-green-300'
                       : project.status === 'in_progress'
-                      ? 'bg-blue-100 text-blue-700 border border-blue-300'
-                      : project.status === 'on_hold'
-                      ? 'bg-yellow-100 text-yellow-700 border border-yellow-300'
-                      : 'bg-gray-100 text-gray-700 border border-gray-300'
-                  }`}>
+                        ? 'bg-blue-100 text-blue-700 border border-blue-300'
+                        : project.status === 'on_hold'
+                          ? 'bg-yellow-100 text-yellow-700 border border-yellow-300'
+                          : 'bg-gray-100 text-gray-700 border border-gray-300'
+                    }`}>
                     {project.status?.replace(/_/g, ' ') || 'Unknown'}
                   </span>
                 </div>
@@ -444,7 +440,7 @@ const ProjectView = () => {
 
           {/* New Task Button */}
           <div className="mb-6 flex justify-end">
-            <button 
+            <button
               onClick={() => {
                 if (isProjectLocked) {
                   toast.error('Completed projects cannot receive new tasks')

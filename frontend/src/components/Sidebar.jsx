@@ -2,10 +2,10 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { useAuthStore } from '../stores/authStore'
 import CreateProjectModal from './CreateProjectModal'
-import { 
-  FaHome, 
-  FaFileAlt, 
-  FaFolder, 
+import {
+  FaHome,
+  FaFileAlt,
+  FaFolder,
   FaCalendar,
   FaBell,
   FaSignOutAlt,
@@ -71,7 +71,7 @@ const Sidebar = () => {
       {/* Add Project Button */}
       {canAddProject && (
         <div className="p-4">
-          <button 
+          <button
             onClick={() => setShowCreateProject(true)}
             className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center space-x-2 transition-colors"
           >
@@ -82,20 +82,19 @@ const Sidebar = () => {
       )}
 
       {/* Navigation Menu */}
-      <nav className="flex-1 px-4 py-2 overflow-y-auto">
+      <nav className="flex-1 px-4 py-2 overflow-hidden">
         {menuItems.map((item) => {
           const Icon = item.icon
           const active = isActive(item.path)
-          
+
           return (
             <Link
               key={item.path}
               to={item.path}
-              className={`flex items-center space-x-3 px-4 py-3 mb-2 rounded-lg transition-colors ${
-                active
+              className={`flex items-center space-x-3 px-4 py-3 mb-2 rounded-lg transition-colors ${active
                   ? 'bg-gray-900 text-white'
                   : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-              }`}
+                }`}
             >
               <div className="p-2 rounded-lg bg-orange-600">
                 <Icon className="text-white text-lg" />
@@ -105,21 +104,20 @@ const Sidebar = () => {
           )
         })}
 
-        {/* Collapsible Administrasi Menu */}
+        {/* Collapsible Administration Menu */}
         <div className="mb-2">
           <button
             onClick={() => setIsAdminOpen(prev => !prev)}
-            className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors ${
-              isSubmenuActive
+            className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors ${isSubmenuActive
                 ? 'bg-gray-900 text-white font-semibold'
                 : 'text-gray-300 hover:bg-gray-700 hover:text-white'
-            }`}
+              }`}
           >
             <div className="flex items-center space-x-3">
               <div className="p-2 rounded-lg bg-orange-600">
                 <FaCogs className="text-white text-lg" />
               </div>
-              <span className="font-medium">Administrasi</span>
+              <span className="font-medium">Administration</span>
             </div>
             {isAdminOpen ? <FaChevronUp className="text-white text-sm" /> : <FaChevronDown className="text-white text-sm" />}
           </button>
@@ -134,11 +132,10 @@ const Sidebar = () => {
                   <Link
                     key={item.path}
                     to={item.path}
-                    className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors ${
-                      active
+                    className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors ${active
                         ? 'bg-gray-700 text-white font-medium'
                         : 'text-gray-400 hover:bg-gray-700 hover:text-white'
-                    }`}
+                      }`}
                   >
                     <Icon className="text-white text-md" />
                     <span className="text-sm font-medium">{item.name}</span>
