@@ -11,6 +11,7 @@ class Document extends Model
 
     protected $fillable = [
         'project_id',
+        'folder_name',
         'title',
         'file_name',
         'file_path',

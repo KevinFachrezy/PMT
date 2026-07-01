@@ -26,6 +26,11 @@ class DocumentController extends Controller
             $query->where('project_id', $request->project_id);
         }
 
+        // Filter by folder_name
+        if ($request->has('folder_name')) {
+            $query->where('folder_name', $request->folder_name);
+        }
+
         // Filter by file type
         if ($request->has('file_type')) {
             $query->where('file_type', $request->file_type);
@@ -62,6 +67,7 @@ class DocumentController extends Controller
     {
         $request->validate([
             'project_id' => 'required|exists:projects,id',
+            'folder_name' => 'nullable|string|max:255',
             'title' => 'required|string|max:255',
             'file' => 'required|file|max:10240|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png,txt'
         ]);
@@ -86,6 +92,7 @@ class DocumentController extends Controller
             // Create document record
             $document = Document::create([
                 'project_id' => $request->project_id,
+                'folder_name' => $request->folder_name,
                 'title' => $request->title,
                 'file_name' => $file->getClientOriginalName(),
                 'file_path' => $filePath,

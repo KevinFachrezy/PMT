@@ -373,7 +373,7 @@ const DocumentCenter = () => {
                             </span>
                           </div>
                           <p className="text-sm text-gray-500 mb-2 line-clamp-2 leading-relaxed">{folder.desc}</p>
-                          <span className="text-xs font-semibold text-orange-600 hover:underline">Buka Folder →</span>
+                          <span className="text-xs font-semibold text-orange-600 hover:underline">Open Folder →</span>
                         </div>
                       </button>
                     )
@@ -423,7 +423,7 @@ const DocumentCenter = () => {
               <div className="bg-white rounded-xl shadow-md border border-gray-100 p-8 mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
                   <FaUpload className="mr-3 text-orange-600 text-xl" />
-                  Upload ke Folder: {activeFolder}
+                  Upload to Folder: {activeFolder}
                 </h2>
                 <form onSubmit={handleUpload} className="space-y-5">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -508,8 +508,8 @@ const DocumentCenter = () => {
                         </div>
 
                         <div className="border-t border-gray-200 pt-5 mb-6 text-xs text-gray-600 space-y-2">
-                          <p className="truncate"><span className="font-bold text-gray-800">Diupload oleh:</span> {doc.uploader?.name || 'N/A'}</p>
-                          <p><span className="font-bold text-gray-800">Tanggal:</span> {new Date(doc.created_at).toLocaleDateString('id-ID')}</p>
+                          <p className="truncate"><span className="font-bold text-gray-800">Uploaded by:</span> {doc.uploader?.name || 'N/A'}</p>
+                          <p><span className="font-bold text-gray-800">Date:</span> {new Date(doc.created_at).toLocaleDateString('id-ID')}</p>
                         </div>
 
                         <div className="flex gap-3">
