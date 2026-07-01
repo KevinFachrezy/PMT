@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from 'react'
-import { createPortal } from 'react-dom'
 import { FaTimes, FaFileSignature, FaSpinner, FaCopy } from 'react-icons/fa'
 import toast from 'react-hot-toast'
 import { templateService } from '../services'
@@ -137,6 +136,7 @@ const GenerateProposalModal = ({ isOpen, onClose, projectId, onSuccess }) => {
 
     try {
       const payload = {
+        project_id: projectId,
         title: formData.title,
         tanggal: generatedData.tanggalIndo,
         nomor_surat: generatedData.nomorSurat,
@@ -151,20 +151,8 @@ const GenerateProposalModal = ({ isOpen, onClose, projectId, onSuccess }) => {
         nominal_dalam_alphabet: formData.nominal_dalam_alphabet
       }
 
-      const response = await templateService.generateProposal(payload)
-      
-      // Handle file download
-      const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' })
-      const url = window.URL.createObjectURL(blob)
-      const a = window.document.createElement('a')
-      a.href = url
-      a.download = `${formData.title}.docx`
-      window.document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      window.document.body.removeChild(a)
-
-      toast.success('Proposal generated and downloaded successfully')
+      await templateService.generateProposal(payload)
+      toast.success('Proposal generated successfully')
 
       if (onSuccess) {
         onSuccess()
@@ -178,8 +166,8 @@ const GenerateProposalModal = ({ isOpen, onClose, projectId, onSuccess }) => {
     }
   }
 
-  return createPortal(
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[100] p-4">
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto transform transition-all border border-gray-100">
         {/* Header */}
         <div className="bg-orange-600 px-6 py-4 text-white flex items-center justify-between">
@@ -443,8 +431,7 @@ const GenerateProposalModal = ({ isOpen, onClose, projectId, onSuccess }) => {
           </div>
         </form>
       </div>
-    </div>,
-    document.body
+    </div>
   )
 }
 

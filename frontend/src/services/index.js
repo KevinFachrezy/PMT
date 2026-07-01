@@ -242,7 +242,7 @@ export const templateService = {
 
   // Generate proposal from docx template
   generateProposal: async (data) => {
-    const response = await apiClient.post('/templates/generate-proposal', data, { responseType: 'blob' })
+    const response = await apiClient.post('/templates/generate-proposal', data)
     return response.data
   },
 }
