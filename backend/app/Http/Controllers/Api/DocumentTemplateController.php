@@ -129,7 +129,7 @@ class DocumentTemplateController extends Controller
         $content = $template->generate($validated['data']);
 
         // Create document file
-        $fileName = $validated['title'] . '_' . time() . '.' . $template->file_extension;
+        $fileName = $validated['title'] . '.' . $template->file_extension;
         $filePath = 'documents/' . $fileName;
 
         // Save to storage
@@ -180,7 +180,7 @@ class DocumentTemplateController extends Controller
             return response()->json(['success' => false, 'message' => 'Template not found'], 404);
         }
 
-        $fileName = $validated['title'] . '_' . time() . '.docx';
+        $fileName = $validated['title'] . '.docx';
         $filePath = 'documents/' . $fileName;
         $tempPath = tempnam(sys_get_temp_dir(), 'prop_') . '.docx';
 
