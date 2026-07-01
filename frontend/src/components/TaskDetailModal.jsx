@@ -269,40 +269,36 @@ const TaskDetailModal = ({ task, isOpen, onClose, onUpdate, onDelete, isLocked =
 
           {/* Task Description */}
           <div>
-            <div className="flex items-center space-x-2 mb-2">
-              <div className="w-8 h-8 flex items-center justify-center border-2 border-orange-600 rounded">
-                <span className="text-orange-600">💬</span>
-              </div>
-              <h3 className="font-semibold text-gray-800">Task Description</h3>
+            <label className="block text-sm font-semibold text-white bg-orange-600 px-4 py-2 rounded-t-lg">
+              Task Description
+            </label>
+            <div className="border-2 border-orange-600 rounded-b-lg">
+              {isEditing ? (
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  rows="4"
+                  className="w-full px-4 py-2 border-none focus:ring-0 bg-transparent rounded-b-lg resize-y"
+                  placeholder="Enter task description..."
+                />
+              ) : (
+                <div className="px-4 py-3 min-h-[100px]">
+                  <p className="text-gray-700 whitespace-pre-wrap">
+                    {formData.description || 'No description provided'}
+                  </p>
+                </div>
+              )}
             </div>
-            {isEditing ? (
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                rows="4"
-                className="w-full px-4 py-2 border-2 border-orange-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                placeholder="Enter task description..."
-              />
-            ) : (
-              <div className="border-2 border-orange-600 rounded-lg p-4 min-h-[100px]">
-                <p className="text-gray-700">
-                  {formData.description || 'No description provided'}
-                </p>
-              </div>
-            )}
           </div>
 
           {/* Related Documents — only shown when documents exist */}
           {task.documents && task.documents.length > 0 && (
             <div>
-              <div className="flex items-center space-x-2 mb-2">
-                <div className="w-8 h-8 flex items-center justify-center border-2 border-orange-600 rounded">
-                  <span className="text-orange-600">📄</span>
-                </div>
-                <h3 className="font-semibold text-gray-800">Related Document</h3>
-              </div>
-              <div className="border-2 border-orange-600 rounded-lg p-4">
+              <label className="block text-sm font-semibold text-white bg-orange-600 px-4 py-2 rounded-t-lg">
+                Related Documents
+              </label>
+              <div className="border-2 border-orange-600 rounded-b-lg px-4 py-3">
                 <ul className="list-decimal list-inside text-gray-700 space-y-1">
                   {task.documents.map((doc) => (
                     <li key={doc.id} className="underline cursor-pointer hover:text-orange-600">
