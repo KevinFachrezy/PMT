@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FaUserCircle, FaSignOutAlt } from 'react-icons/fa'
+import { FaUserCircle, FaSignOutAlt, FaKey } from 'react-icons/fa'
 import { useAuthStore } from '../stores/authStore'
 import NotificationDropdown from './NotificationDropdown'
 import GlobalSearchBar from './GlobalSearchBar'
+import ChangePasswordModal from './ChangePasswordModal'
 
 const Header = () => {
   const navigate = useNavigate()
   const { user, logout } = useAuthStore()
   const [showProfileMenu, setShowProfileMenu] = useState(false)
+  const [showChangePassword, setShowChangePassword] = useState(false)
   const profileMenuRef = useRef(null)
 
   useEffect(() => {
@@ -64,6 +66,18 @@ const Header = () => {
                 <p className="text-xs text-gray-500 truncate mt-1">{user?.email || '-'}</p>
               </div>
 
+              {/* Change Password Option */}
+              <button
+                onClick={() => {
+                  setShowProfileMenu(false)
+                  setShowChangePassword(true)
+                }}
+                className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center space-x-2 border-b border-gray-100"
+              >
+                <FaKey className="text-gray-500" />
+                <span>Change Password</span>
+              </button>
+
               <button
                 onClick={handleLogout}
                 className="w-full px-4 py-3 text-left text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center space-x-2"
@@ -75,6 +89,11 @@ const Header = () => {
           )}
         </div>
       </div>
+
+      <ChangePasswordModal
+        isOpen={showChangePassword}
+        onClose={() => setShowChangePassword(false)}
+      />
     </div>
   )
 }

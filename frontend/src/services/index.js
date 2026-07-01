@@ -239,6 +239,12 @@ export const templateService = {
     const response = await apiClient.post(`/templates/${templateId}/generate`, data)
     return response.data
   },
+
+  // Generate proposal from docx template
+  generateProposal: async (data) => {
+    const response = await apiClient.post('/templates/generate-proposal', data)
+    return response.data
+  },
 }
 
 export const userService = {

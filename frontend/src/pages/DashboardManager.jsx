@@ -9,6 +9,7 @@ import {
   FaTrash,
   FaTimes,
   FaCalendarAlt,
+  FaExclamationTriangle,
 } from 'react-icons/fa'
 import toast from 'react-hot-toast'
 import Sidebar from '../components/Sidebar'
@@ -36,19 +37,20 @@ const DashboardManager = () => {
   const [eventForm, setEventForm] = useState({
     title: '',
     project_id: '',
-    assigned_to: '',
+    assigned_to: [],
     due_date: '',
     priority: 'medium',
-    status: 'todo',
+    status: 'meeting_offline',
     description: '',
   })
+
   const [editEventForm, setEditEventForm] = useState({
     title: '',
     project_id: '',
-    assigned_to: '',
+    assigned_to: [],
     due_date: '',
     priority: 'medium',
-    status: 'todo',
+    status: 'meeting_offline',
     description: '',
   })
 
@@ -90,10 +92,15 @@ const DashboardManager = () => {
 
       const today = new Date()
       today.setHours(0, 0, 0, 0)
+      
+      const year = today.getFullYear()
+      const month = String(today.getMonth() + 1).padStart(2, '0')
+      const day = String(today.getDate()).padStart(2, '0')
+      const todayStr = `${year}-${month}-${day}`
 
       const events = loadedTasks
         .filter(task => task?.due_date && task?.status !== 'completed')
-        .filter(task => new Date(task.due_date) >= today)
+        .filter(task => task.due_date.substring(0, 10) >= todayStr)
         .sort((a, b) => new Date(a.due_date) - new Date(b.due_date))
 
       setUpcomingEvents(events)
@@ -135,13 +142,44 @@ const DashboardManager = () => {
       return event.status === eventStatusFilter
     })
 
+  const groupedFilteredEvents = Object.values(filteredUpcomingEvents.reduce((acc, event) => {
+    const key = `${event.title}_${event.due_date}_${event.project_id}_${event.status}`;
+    if (!acc[key]) {
+      acc[key] = {
+        ...event,
+        grouped_ids: [event.id],
+        grouped_handlers: event.assignedUser ? [event.assignedUser] : [],
+        handler_task_map: { [String(event.assigned_to)]: event.id }
+      };
+    } else {
+      acc[key].grouped_ids.push(event.id);
+      acc[key].handler_task_map[String(event.assigned_to)] = event.id;
+      if (event.assignedUser && !acc[key].grouped_handlers.some(h => h.id === event.assignedUser.id)) {
+        acc[key].grouped_handlers.push(event.assignedUser);
+      }
+    }
+    return acc;
+  }, {}));
+
   const visibleUpcomingEvents = showAllEvents
-    ? filteredUpcomingEvents
-    : filteredUpcomingEvents.slice(0, 8)
+    ? groupedFilteredEvents
+    : groupedFilteredEvents.slice(0, 8)
 
   const handleEventFormChange = (e) => {
     const { name, value } = e.target
     setEventForm(prev => ({ ...prev, [name]: value }))
+  }
+
+  const handleAssignedToChange = (handlerId) => {
+    const id = String(handlerId)
+    setEventForm(prev => {
+      const assigned = prev.assigned_to || []
+      if (assigned.includes(id)) {
+        return { ...prev, assigned_to: assigned.filter(i => i !== id) }
+      } else {
+        return { ...prev, assigned_to: [...assigned, id] }
+      }
+    })
   }
 
   const handleEditEventFormChange = (e) => {
@@ -149,15 +187,27 @@ const DashboardManager = () => {
     setEditEventForm(prev => ({ ...prev, [name]: value }))
   }
 
+  const handleEditAssignedToChange = (handlerId) => {
+    const id = String(handlerId)
+    setEditEventForm(prev => {
+      const assigned = prev.assigned_to || []
+      if (assigned.includes(id)) {
+        return { ...prev, assigned_to: assigned.filter(i => i !== id) }
+      } else {
+        return { ...prev, assigned_to: [...assigned, id] }
+      }
+    })
+  }
+
   const handleStartEditEvent = (event) => {
     setEditingEventId(event.id)
     setEditEventForm({
       title: event.title || '',
       project_id: String(event.project_id || ''),
-      assigned_to: String(event.assigned_to || ''),
+      assigned_to: event.grouped_handlers ? event.grouped_handlers.map(h => String(h.id)) : (event.assigned_to ? [String(event.assigned_to)] : []),
       due_date: event.due_date || '',
       priority: event.priority || 'medium',
-      status: event.status || 'todo',
+      status: event.status || 'meeting_offline',
       description: event.description || '',
     })
   }
@@ -167,10 +217,10 @@ const DashboardManager = () => {
     setEditEventForm({
       title: '',
       project_id: '',
-      assigned_to: '',
+      assigned_to: [],
       due_date: '',
       priority: 'medium',
-      status: 'todo',
+      status: 'meeting_offline',
       description: '',
     })
   }
@@ -186,7 +236,7 @@ const DashboardManager = () => {
       toast.error('Project is required')
       return
     }
-    if (!eventForm.assigned_to) {
+    if (!eventForm.assigned_to || eventForm.assigned_to.length === 0) {
       toast.error('Handler is required')
       return
     }
@@ -198,24 +248,26 @@ const DashboardManager = () => {
     try {
       setIsCreatingEvent(true)
 
-      await taskService.create({
-        title: eventForm.title,
-        description: eventForm.description,
-        project_id: eventForm.project_id,
-        assigned_to: eventForm.assigned_to,
-        due_date: eventForm.due_date,
-        priority: eventForm.priority,
-        status: eventForm.status,
-      })
+      await Promise.all(eventForm.assigned_to.map(handlerId => 
+        taskService.create({
+          title: eventForm.title,
+          description: eventForm.description,
+          project_id: eventForm.project_id,
+          assigned_to: handlerId,
+          due_date: eventForm.due_date,
+          priority: eventForm.priority,
+          status: eventForm.status,
+        })
+      ))
 
-      toast.success('Event created successfully')
+      toast.success('Event(s) created successfully')
       setEventForm({
         title: '',
         project_id: '',
-        assigned_to: '',
+        assigned_to: [],
         due_date: '',
         priority: 'medium',
-        status: 'todo',
+        status: 'meeting_offline',
         description: '',
       })
       setShowEventForm(false)
@@ -228,7 +280,7 @@ const DashboardManager = () => {
     }
   }
 
-  const handleUpdateEvent = async (e, eventId) => {
+  const handleUpdateEvent = async (e, eventObj) => {
     e.preventDefault()
 
     if (!editEventForm.title.trim()) {
@@ -239,7 +291,7 @@ const DashboardManager = () => {
       toast.error('Project is required')
       return
     }
-    if (!editEventForm.assigned_to) {
+    if (!editEventForm.assigned_to || editEventForm.assigned_to.length === 0) {
       toast.error('Handler is required')
       return
     }
@@ -251,15 +303,49 @@ const DashboardManager = () => {
     try {
       setIsUpdatingEvent(true)
 
-      await taskService.update(eventId, {
-        title: editEventForm.title,
-        description: editEventForm.description,
-        project_id: editEventForm.project_id,
-        assigned_to: editEventForm.assigned_to,
-        due_date: editEventForm.due_date,
-        priority: editEventForm.priority,
-        status: editEventForm.status,
+      const oldHandlers = eventObj.handler_task_map ? Object.keys(eventObj.handler_task_map) : [String(eventObj.assigned_to)]
+      const newHandlers = editEventForm.assigned_to
+
+      const toCreate = newHandlers.filter(id => !oldHandlers.includes(id))
+      const toDelete = oldHandlers.filter(id => !newHandlers.includes(id))
+      const toUpdate = oldHandlers.filter(id => newHandlers.includes(id))
+
+      const promises = []
+
+      // Delete
+      toDelete.forEach(id => {
+        const taskId = eventObj.handler_task_map ? eventObj.handler_task_map[id] : eventObj.id
+        promises.push(taskService.delete(taskId))
       })
+
+      // Update
+      toUpdate.forEach(id => {
+        const taskId = eventObj.handler_task_map ? eventObj.handler_task_map[id] : eventObj.id
+        promises.push(taskService.update(taskId, {
+          title: editEventForm.title,
+          description: editEventForm.description,
+          project_id: editEventForm.project_id,
+          assigned_to: id,
+          due_date: editEventForm.due_date,
+          priority: editEventForm.priority,
+          status: editEventForm.status,
+        }))
+      })
+
+      // Create
+      toCreate.forEach(id => {
+        promises.push(taskService.create({
+          title: editEventForm.title,
+          description: editEventForm.description,
+          project_id: editEventForm.project_id,
+          assigned_to: id,
+          due_date: editEventForm.due_date,
+          priority: editEventForm.priority,
+          status: editEventForm.status,
+        }))
+      })
+
+      await Promise.all(promises)
 
       toast.success('Event updated successfully')
       handleCancelEditEvent()
@@ -272,14 +358,15 @@ const DashboardManager = () => {
     }
   }
 
-  const handleDeleteEvent = async (eventId) => {
+  const handleDeleteEvent = async (eventObj) => {
     if (!window.confirm('Delete this event?')) return
 
     try {
-      setDeletingEventId(eventId)
-      await taskService.delete(eventId)
+      setDeletingEventId(eventObj.id)
+      const idsToDelete = eventObj.grouped_ids || [eventObj.id]
+      await Promise.all(idsToDelete.map(id => taskService.delete(id)))
       toast.success('Event deleted successfully')
-      if (editingEventId === eventId) handleCancelEditEvent()
+      if (editingEventId === eventObj.id) handleCancelEditEvent()
       fetchDashboardData()
     } catch (err) {
       console.error('Error deleting event:', err)
@@ -440,18 +527,19 @@ const DashboardManager = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Handler</label>
-                    <select
-                      name="assigned_to"
-                      value={eventForm.assigned_to}
-                      onChange={handleEventFormChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      required
-                    >
-                      <option value="">Select handler</option>
+                    <div className="w-full px-4 py-2 border border-gray-300 rounded-lg max-h-[120px] overflow-y-auto space-y-2 bg-white">
                       {handlers.map(handler => (
-                        <option key={handler.id} value={handler.id}>{handler.name}</option>
+                        <label key={handler.id} className="flex items-center space-x-2 cursor-pointer">
+                          <input 
+                            type="checkbox"
+                            className="rounded text-orange-600 focus:ring-orange-500"
+                            checked={(eventForm.assigned_to || []).includes(String(handler.id))}
+                            onChange={() => handleAssignedToChange(handler.id)}
+                          />
+                          <span className="text-sm text-gray-700">{handler.name}</span>
+                        </label>
                       ))}
-                    </select>
+                    </div>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Event Date</label>
@@ -485,10 +573,8 @@ const DashboardManager = () => {
                       onChange={handleEventFormChange}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     >
-                      <option value="todo">To Do</option>
-                      <option value="in_progress">In Progress</option>
-                      <option value="review">Review</option>
-                      <option value="completed">Completed</option>
+                      <option value="meeting_offline">meeting - offline</option>
+                      <option value="meeting_online">meeting - online</option>
                     </select>
                   </div>
                   <div className="md:col-span-2">
@@ -537,10 +623,21 @@ const DashboardManager = () => {
                       <div className="flex items-center space-x-2">
                         <div className={`w-3 h-3 rounded-full ${getEventDotColor(event.priority)}`} />
                         <span className="text-gray-600 font-medium">{formatEventDate(event.due_date)}</span>
+                        {(() => {
+                          if (!event.due_date) return null
+                          const dueDate = new Date(event.due_date)
+                          dueDate.setHours(0, 0, 0, 0)
+                          const today = new Date()
+                          today.setHours(0, 0, 0, 0)
+                          const diffTime = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24))
+                          return diffTime <= 1 ? (
+                            <FaExclamationTriangle className="text-red-500 text-sm animate-pulse" title="Mendekati deadline atau terlambat" />
+                          ) : null
+                        })()}
                       </div>
                       <div className="flex items-center space-x-2">
                         <span className="text-xs font-semibold px-2 py-1 rounded-full bg-gray-100 text-gray-600">
-                          {event.status?.replace('_', ' ').toUpperCase()}
+                          {event.status?.replace('_', ' - ')}
                         </span>
                         <button
                           onClick={() => handleStartEditEvent(event)}
@@ -550,7 +647,7 @@ const DashboardManager = () => {
                           <FaEdit className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => handleDeleteEvent(event.id)}
+                          onClick={() => handleDeleteEvent(event)}
                           disabled={deletingEventId === event.id}
                           className="p-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           title="Delete event"
@@ -561,6 +658,15 @@ const DashboardManager = () => {
                     </div>
                     <h3 className="text-gray-900 text-lg font-semibold mt-2">{event.title}</h3>
                     <p className="text-sm text-gray-500 mt-1">Project: {event.project?.title || 'N/A'}</p>
+                    {event.grouped_handlers && event.grouped_handlers.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {event.grouped_handlers.map(h => (
+                          <span key={h.id} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full border border-gray-200">
+                            {h.name}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     <div className="mt-3 flex justify-end">
                       <button
                         onClick={() => navigate(`/calendar?date=${event.due_date}&project_id=${event.project_id || ''}`)}
@@ -573,7 +679,7 @@ const DashboardManager = () => {
 
                     {editingEventId === event.id && (
                       <form
-                        onSubmit={(e) => handleUpdateEvent(e, event.id)}
+                        onSubmit={(e) => handleUpdateEvent(e, event)}
                         className="mt-4 p-4 border border-gray-200 rounded-lg bg-gray-50"
                       >
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -606,18 +712,20 @@ const DashboardManager = () => {
                               <option key={project.id} value={project.id}>{project.title}</option>
                             ))}
                           </select>
-                          <select
-                            name="assigned_to"
-                            value={editEventForm.assigned_to}
-                            onChange={handleEditEventFormChange}
-                            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                            required
-                          >
-                            <option value="">Select handler</option>
+                          <div className="w-full px-3 py-2 border border-gray-300 rounded-lg max-h-[120px] overflow-y-auto space-y-2 bg-white">
+                            <span className="block text-xs text-gray-500 mb-1">Select handlers:</span>
                             {handlers.map(handler => (
-                              <option key={handler.id} value={handler.id}>{handler.name}</option>
+                              <label key={handler.id} className="flex items-center space-x-2 cursor-pointer">
+                                <input 
+                                  type="checkbox"
+                                  className="rounded text-orange-600 focus:ring-orange-500"
+                                  checked={(editEventForm.assigned_to || []).includes(String(handler.id))}
+                                  onChange={() => handleEditAssignedToChange(handler.id)}
+                                />
+                                <span className="text-sm text-gray-700">{handler.name}</span>
+                              </label>
                             ))}
-                          </select>
+                          </div>
                           <select
                             name="priority"
                             value={editEventForm.priority}
@@ -634,10 +742,8 @@ const DashboardManager = () => {
                             onChange={handleEditEventFormChange}
                             className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                           >
-                            <option value="todo">To Do</option>
-                            <option value="in_progress">In Progress</option>
-                            <option value="review">Review</option>
-                            <option value="completed">Completed</option>
+                            <option value="meeting_offline">meeting - offline</option>
+                            <option value="meeting_online">meeting - online</option>
                           </select>
                           <div className="md:col-span-2">
                             <textarea

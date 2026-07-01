@@ -1,8 +1,8 @@
-﻿import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   FaFile, FaDownload, FaTrash, FaUpload,
   FaFileAlt, FaFilePdf, FaFileWord, FaFileExcel, FaFileImage,
-  FaMagic, FaEye, FaCalendarAlt,
+  FaMagic, FaEye, FaCalendarAlt, FaFolder, FaFolderOpen, FaFileSignature
 } from 'react-icons/fa'
 import toast from 'react-hot-toast'
 import Sidebar from '../components/Sidebar'
@@ -11,13 +11,25 @@ import TemplateSelectionModal from '../components/TemplateSelectionModal'
 import TemplateFormModal from '../components/TemplateFormModal'
 import FilePreviewModal from '../components/FilePreviewModal'
 import CalendarView from '../components/CalendarView'
+import GenerateProposalModal from '../components/GenerateProposalModal'
 import { documentService, projectService } from '../services'
+import { useAuthStore } from '../stores/authStore'
+
+const FOLDERS = [
+  { name: 'Admin', roles: ['manager'], desc: 'Collection of internal administration documents (Manager Only)' },
+  { name: 'Client Data', roles: ['manager', 'project_handler'], desc: 'Documents and data files from clients' },
+  { name: 'KKP', roles: ['manager', 'project_handler'], desc: 'Audit Working Papers (KKP)' },
+  { name: 'REPORT', roles: ['manager', 'project_handler'], desc: 'Final reports, proposals, and audit reports' },
+  { name: 'Last Year', roles: ['manager', 'project_handler'], desc: 'Archive of last year files and supporting documents' }
+]
 
 const DocumentCenter = () => {
+  const { user } = useAuthStore()
   const [documents, setDocuments] = useState([])
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedProject, setSelectedProject] = useState('')
+  const [activeFolder, setActiveFolder] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [isUploading, setIsUploading] = useState(false)
   const [uploadData, setUploadData] = useState({ project_id: '', title: '', file: null })
@@ -28,24 +40,38 @@ const DocumentCenter = () => {
   const [previewDoc, setPreviewDoc] = useState(null)
   const [downloadTarget, setDownloadTarget] = useState(null)
   const [showCalendar, setShowCalendar] = useState(false)
+  const [showGenerateProposal, setShowGenerateProposal] = useState(false)
 
   useEffect(() => {
     fetchProjects()
     fetchDocuments()
-  }, [selectedProject]) // eslint-disable-line
+  }, [])
+
+  useEffect(() => {
+    if (selectedProject) {
+      fetchDocuments()
+    }
+  }, [selectedProject, activeFolder])
 
   const activeProject = useMemo(() => {
     if (!selectedProject) return null
     return projects.find((p) => String(p.id) === String(selectedProject)) || null
   }, [selectedProject, projects])
 
+  const visibleFolders = useMemo(() => {
+    return FOLDERS.filter(f => f.roles.includes(user?.role))
+  }, [user])
+
   const fetchProjects = async () => {
     try {
+      setLoading(true)
       const response = await projectService.getAll()
       const data = response.data?.success ? response.data.data : response.data
       setProjects(Array.isArray(data) ? data : data?.data || [])
     } catch (err) {
       console.error('Error fetching projects:', err)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -55,6 +81,7 @@ const DocumentCenter = () => {
       const params = {}
       if (selectedProject) params.project_id = selectedProject
       if (searchTerm) params.search = searchTerm
+      if (activeFolder) params.folder_name = activeFolder
 
       const response = await documentService.getAll(params)
       const data = response.data?.success ? response.data.data : response.data
@@ -97,8 +124,12 @@ const DocumentCenter = () => {
     try {
       const formData = new FormData()
       formData.append('project_id', uploadData.project_id)
+      if (activeFolder) {
+        formData.append('folder_name', activeFolder)
+      }
       formData.append('title', uploadData.title)
       formData.append('file', uploadData.file)
+      
       await documentService.upload(formData)
       toast.success('Document uploaded successfully')
       setUploadData(prev => ({ ...prev, title: '', file: null }))
@@ -190,6 +221,7 @@ const DocumentCenter = () => {
 
   const projectCards = useMemo(() => {
     return projects.map((project) => {
+      // In folder list view, we don't have folder_name filtered yet so we count all files of this project
       const docs = documents.filter((d) => String(d.project_id) === String(project.id))
       return {
         project,
@@ -241,9 +273,10 @@ const DocumentCenter = () => {
 
           {!activeProject ? (
             <>
+              {/* Project Folders Overview */}
               <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-8 mb-10">
                 <h2 className="text-3xl font-bold text-gray-900 mb-2">Project Folders</h2>
-                <p className="text-base text-gray-600">Pilih project untuk membuka Document Center dan kelola semua dokumen proyek Anda.</p>
+                <p className="text-base text-gray-600">Select a project to open the Document Center and manage all your project documents.</p>
               </div>
 
               {loading ? (
@@ -253,7 +286,7 @@ const DocumentCenter = () => {
               ) : projectCards.length === 0 ? (
                 <div className="text-center py-12 bg-white rounded-lg shadow-md">
                   <FaFile className="mx-auto text-gray-300 text-6xl mb-4" />
-                  <p className="text-gray-500 text-lg">Belum ada project</p>
+                  <p className="text-gray-500 text-lg">No projects found</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
@@ -266,6 +299,7 @@ const DocumentCenter = () => {
                         setUploadData({ project_id: id, title: '', file: null })
                         setTemplateProjectId(id)
                         setSearchTerm('')
+                        setActiveFolder(null) // reset to folders view
                       }}
                       className="text-left bg-white rounded-xl shadow-md hover:shadow-xl border border-gray-100 hover:border-orange-300 transition-all duration-300 p-7 hover:scale-105 hover:translate-y-[-4px]"
                     >
@@ -286,7 +320,7 @@ const DocumentCenter = () => {
                             <span className="truncate font-medium text-gray-800" title={latest.title}>{latest.title}</span>
                           </div>
                         ) : (
-                          <span className="text-gray-500 italic">Belum ada dokumen</span>
+                          <span className="text-gray-500 italic">No documents found</span>
                         )}
                       </div>
                     </button>
@@ -294,58 +328,121 @@ const DocumentCenter = () => {
                 </div>
               )}
             </>
+          ) : !activeFolder ? (
+            <>
+              {/* Folder Grid View */}
+              <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl shadow-md border border-gray-100 p-8 mb-8">
+                <div>
+                  <button
+                    onClick={() => {
+                      setSelectedProject('')
+                      setSearchTerm('')
+                    }}
+                    className="text-sm text-orange-600 hover:text-orange-800 font-bold mb-3 inline-flex items-center transition-colors"
+                  >
+                    ← Back to Project List
+                  </button>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-1">{activeProject.title}</h2>
+                  <p className="text-base text-gray-600">Select a folder below to access or upload files.</p>
+                </div>
+              </div>
+
+              {loading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-orange-600" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {visibleFolders.map((folder) => {
+                    const count = documents.filter(d => d.folder_name === folder.name).length
+                    return (
+                      <button
+                        key={folder.name}
+                        onClick={() => {
+                          setActiveFolder(folder.name)
+                        }}
+                        className="text-left bg-white rounded-xl shadow-md hover:shadow-xl border border-gray-100 hover:border-orange-300 transition-all p-6 hover:scale-105 flex items-start space-x-4"
+                      >
+                        <div className="p-3 rounded-lg bg-orange-50 text-orange-600">
+                          <FaFolderOpen className="text-4xl" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <h3 className="font-bold text-lg text-gray-900 truncate">{folder.name}</h3>
+                            <span className="text-xs font-bold px-2.5 py-1 rounded bg-orange-100 text-orange-700">
+                              {count} file{count !== 1 ? 's' : ''}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-500 mb-2 line-clamp-2 leading-relaxed">{folder.desc}</p>
+                          <span className="text-xs font-semibold text-orange-600 hover:underline">Buka Folder →</span>
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+            </>
           ) : (
             <>
+              {/* Files Inside Active Folder View */}
               <div className="bg-gradient-to-r from-gray-50 to-white rounded-xl shadow-md border border-gray-100 p-8 mb-8">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                   <div>
                     <button
                       onClick={() => {
-                        setSelectedProject('')
+                        setActiveFolder(null)
                         setSearchTerm('')
                       }}
                       className="text-sm text-orange-600 hover:text-orange-800 font-bold mb-3 inline-flex items-center transition-colors"
                     >
-                      ← Kembali ke Project Folders
+                      ← Back to Folder List
                     </button>
-                    <h2 className="text-3xl font-bold text-gray-900 mb-1">{activeProject.title}</h2>
-                    <p className="text-base text-gray-600">Ruang kerja dokumen untuk proyek ini</p>
+                    <h2 className="text-3xl font-bold text-gray-900 mb-1">
+                      {activeProject.title} / <span className="text-orange-600">{activeFolder}</span>
+                    </h2>
+                    <p className="text-base text-gray-600">
+                      {FOLDERS.find(f => f.name === activeFolder)?.desc}
+                    </p>
                   </div>
 
-                  <button
-                    onClick={handleOpenTemplateSelection}
-                    className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold px-7 py-3 rounded-lg transition-all duration-300 flex items-center justify-center space-x-3 shadow-lg hover:shadow-xl"
-                  >
-                    <FaMagic className="text-lg" />
-                    <span>Gunakan Template</span>
-                  </button>
+                  <div className="flex flex-wrap gap-3">
+                    {/* Proposal generator button — only in REPORT or Admin */}
+                    {(activeFolder === 'REPORT' || activeFolder === 'Admin') && (
+                      <button
+                        onClick={() => setShowGenerateProposal(true)}
+                        className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-bold px-6 py-3 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl"
+                      >
+                        <FaFileSignature className="text-lg" />
+                        <span>Generate Proposal</span>
+                      </button>
+                    )}
+
+                    <button
+                      onClick={handleOpenTemplateSelection}
+                      className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold px-6 py-3 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl"
+                    >
+                      <FaMagic className="text-lg" />
+                      <span>Gunakan Template</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
+              {/* Upload Document Section */}
               <div className="bg-white rounded-xl shadow-md border border-gray-100 p-8 mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
                   <FaUpload className="mr-3 text-orange-600 text-xl" />
-                  Upload Document Baru
+                  Upload ke Folder: {activeFolder}
                 </h2>
                 <form onSubmit={handleUpload} className="space-y-5">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-bold text-gray-900 mb-3">Project</label>
-                      <input
-                        type="text"
-                        value={activeProject.title}
-                        readOnly
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 font-medium"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-bold text-gray-900 mb-3">Judul Dokumen <span className="text-red-500">*</span></label>
+                      <label className="block text-sm font-bold text-gray-900 mb-3">Document Title <span className="text-red-500">*</span></label>
                       <input
                         type="text"
                         value={uploadData.title}
                         onChange={(e) => setUploadData(prev => ({ ...prev, title: e.target.value }))}
-                        placeholder="Masukkan judul dokumen"
+                        placeholder="Enter document title"
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
                         required
                       />
@@ -376,13 +473,14 @@ const DocumentCenter = () => {
                 </form>
               </div>
 
+              {/* Search & Refresh */}
               <div className="flex flex-col md:flex-row gap-4 mb-8">
                 <div className="flex-1">
                   <input
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Cari dokumen berdasarkan judul atau nama file..."
+                    placeholder="Search documents by title or file name..."
                     className="w-full px-5 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all font-medium"
                   />
                 </div>
@@ -394,6 +492,7 @@ const DocumentCenter = () => {
                 </button>
               </div>
 
+              {/* Documents List */}
               {loading ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-orange-600" />
@@ -401,7 +500,7 @@ const DocumentCenter = () => {
               ) : visibleDocuments.length === 0 ? (
                 <div className="text-center py-12 bg-white rounded-lg shadow-md">
                   <FaFile className="mx-auto text-gray-300 text-6xl mb-4" />
-                  <p className="text-gray-500 text-lg">No documents found</p>
+                  <p className="text-gray-500 text-lg">No documents found in folder: {activeFolder}</p>
                   <p className="text-gray-400 text-sm mt-2">Upload your first document above</p>
                 </div>
               ) : (
@@ -495,7 +594,7 @@ const DocumentCenter = () => {
                 onClick={() => setDownloadTarget(null)}
                 className="px-7 py-3 border-2 border-gray-300 rounded-lg text-gray-700 font-bold hover:bg-gray-100 transition-all duration-200"
               >
-                Batal
+                Cancel
               </button>
               <button
                 onClick={confirmDownload}
@@ -507,6 +606,17 @@ const DocumentCenter = () => {
           </div>
         </div>
       )}
+
+      {/* Generate Proposal Modal */}
+      <GenerateProposalModal
+        isOpen={showGenerateProposal}
+        onClose={() => setShowGenerateProposal(false)}
+        projectId={selectedProject}
+        onSuccess={() => {
+          setShowGenerateProposal(false)
+          fetchDocuments() // reload documents list
+        }}
+      />
     </div>
   )
 }

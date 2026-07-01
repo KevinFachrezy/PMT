@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { FaTimes, FaSave, FaUserEdit } from 'react-icons/fa'
+import { FaTimes, FaSave, FaUserEdit, FaEye, FaEyeSlash } from 'react-icons/fa'
 import toast from 'react-hot-toast'
 import { userService } from '../services'
 
@@ -13,6 +13,7 @@ const EditUserModal = ({ isOpen, onClose, user, onSuccess }) => {
   })
   const [loading, setLoading] = useState(false)
   const [changePassword, setChangePassword] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   useEffect(() => {
     if (user) {
@@ -199,15 +200,25 @@ const EditUserModal = ({ isOpen, onClose, user, onSuccess }) => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     New Password <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                    placeholder="Enter new password (min 8 characters)"
-                    minLength={8}
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent pr-12"
+                      placeholder="Enter new password (min 8 characters)"
+                      minLength={8}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none p-2"
+                      tabIndex="-1"
+                    >
+                      {showPassword ? <FaEyeSlash className="w-5 h-5" /> : <FaEye className="w-5 h-5" />}
+                    </button>
+                  </div>
                   <p className="text-xs text-gray-500 mt-1">
                     Leave blank to keep current password
                   </p>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { FaCheckSquare, FaPlus, FaEdit, FaPaperPlane } from 'react-icons/fa'
+import { FaCheckSquare, FaPlus, FaEdit, FaPaperPlane, FaExclamationTriangle } from 'react-icons/fa'
 import toast from 'react-hot-toast'
 import {
   DndContext,
@@ -15,6 +15,7 @@ import Sidebar from '../components/Sidebar'
 import Header from '../components/Header'
 import TaskDetailModal from '../components/TaskDetailModal'
 import CreateTaskModal from '../components/CreateTaskModal'
+import EditProjectModal from '../components/EditProjectModal'
 import { projectService, taskService, userService } from '../services'
 import { useAuthStore } from '../stores/authStore'
 
@@ -30,7 +31,7 @@ const ProjectView = () => {
   const [showTaskDetail, setShowTaskDetail] = useState(false)
   const [showCreateTask, setShowCreateTask] = useState(false)
   const [activeTask, setActiveTask] = useState(null)
-  const [showEditStatus, setShowEditStatus] = useState(false)
+  const [showEditProject, setShowEditProject] = useState(false)
   const [newStatus, setNewStatus] = useState('')
   const [isRequestingCompletion, setIsRequestingCompletion] = useState(false)
   const [projectMembers, setProjectMembers] = useState([])
@@ -259,10 +260,19 @@ const ProjectView = () => {
       ? { transform: `translate(${transform.x}px, ${transform.y}px)` }
       : undefined
 
+    let isWarning = false
+    if (task.due_date && task.status !== 'completed') {
+      const dueDate = new Date(task.due_date)
+      dueDate.setHours(0, 0, 0, 0)
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      const diffTime = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24))
+      if (diffTime <= 1) isWarning = true
+    }
+
     return (
       <div
         ref={setNodeRef}
-        style={style}
         {...listeners}
         {...attributes}
         onClick={(e) => {
@@ -278,8 +288,11 @@ const ProjectView = () => {
           backgroundColor: getPriorityBackgroundColor(task.priority),
         }}
       >
-        <h3 className="text-white font-semibold">{task.title}</h3>
-        <FaCheckSquare className="text-white text-xl opacity-80 group-hover:opacity-100 flex-shrink-0" />
+        <h3 className="text-white font-semibold pr-2">{task.title}</h3>
+        <div className="flex items-center space-x-2 flex-shrink-0">
+          {isWarning && <FaExclamationTriangle className="text-red-500 bg-white rounded-full p-0.5 text-xl animate-pulse" title="Mendekati deadline atau terlambat" />}
+          <FaCheckSquare className="text-white text-xl opacity-80 group-hover:opacity-100" />
+        </div>
       </div>
     )
   }
@@ -386,12 +399,25 @@ const ProjectView = () => {
                 <p className="text-gray-500 text-sm mt-1">
                   Due Date: {formatProjectDate(project.due_date)}
                 </p>
+                <div className="mt-3">
+                  <span className={`inline-block px-3 py-1 text-xs font-bold rounded-full uppercase tracking-wide ${
+                    project.status === 'completed'
+                      ? 'bg-green-100 text-green-700 border border-green-300'
+                      : project.status === 'in_progress'
+                      ? 'bg-blue-100 text-blue-700 border border-blue-300'
+                      : project.status === 'on_hold'
+                      ? 'bg-yellow-100 text-yellow-700 border border-yellow-300'
+                      : 'bg-gray-100 text-gray-700 border border-gray-300'
+                  }`}>
+                    {project.status?.replace(/_/g, ' ') || 'Unknown'}
+                  </span>
+                </div>
               </div>
               <div className="ml-4 flex-shrink-0 flex gap-3">
-                {/* Edit Project Status Button — visible to managers */}
+                {/* Edit Project Button — visible to managers */}
                 {user?.role === 'manager' && (
                   <button
-                    onClick={() => setShowEditStatus(true)}
+                    onClick={() => setShowEditProject(true)}
                     className="flex items-center space-x-2 px-4 py-2 bg-white border-2 border-orange-600 text-orange-600 rounded-lg hover:bg-orange-50 transition-colors"
                   >
                     <FaEdit />
@@ -414,35 +440,6 @@ const ProjectView = () => {
                 )}
               </div>
             </div>
-
-            {/* Edit Status Dropdown */}
-            {showEditStatus && (
-              <div className="mt-4 flex items-center space-x-3 bg-white border border-gray-200 rounded-lg p-4 shadow-sm w-fit">
-                <label className="text-sm font-medium text-gray-700">Change Status:</label>
-                <select
-                  value={newStatus}
-                  onChange={(e) => setNewStatus(e.target.value)}
-                  className="px-3 py-1.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                >
-                  <option value="pending">Pending</option>
-                  <option value="in_progress">In Progress</option>
-                  <option value="on_hold">On Hold</option>
-                  <option value="completed">Completed</option>
-                </select>
-                <button
-                  onClick={handleUpdateProjectStatus}
-                  className="px-4 py-1.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm font-semibold"
-                >
-                  Save
-                </button>
-                <button
-                  onClick={() => setShowEditStatus(false)}
-                  className="px-4 py-1.5 border border-gray-300 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors text-sm"
-                >
-                  Cancel
-                </button>
-              </div>
-            )}
           </div>
 
           {/* New Task Button */}
@@ -531,6 +528,18 @@ const ProjectView = () => {
         onTaskCreated={handleTaskCreated}
         projectMembers={projectMembers}
         isLocked={isProjectLocked}
+      />
+
+      <EditProjectModal
+        isOpen={showEditProject}
+        onClose={() => setShowEditProject(false)}
+        project={project}
+        onProjectUpdated={() => {
+          fetchProjectAndTasks()
+        }}
+        onProjectDeleted={() => {
+          navigate('/projects')
+        }}
       />
     </div>
   )

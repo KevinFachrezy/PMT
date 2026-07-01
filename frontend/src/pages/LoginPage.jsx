@@ -4,7 +4,7 @@ import { useAuthStore } from '../stores/authStore'
 import { authService } from '../services'
 import { userService } from '../services'
 import toast from 'react-hot-toast'
-import { FaEnvelope, FaTimes, FaSpinner } from 'react-icons/fa'
+import { FaEnvelope, FaTimes, FaSpinner, FaEye, FaEyeSlash } from 'react-icons/fa'
 
 const LoginPage = () => {
   const navigate = useNavigate()
@@ -15,6 +15,7 @@ const LoginPage = () => {
     password: '',
   })
   const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const [showVerificationModal, setShowVerificationModal] = useState(false)
   const [unverifiedEmail, setUnverifiedEmail] = useState('')
   const [resendLoading, setResendLoading] = useState(false)
@@ -83,15 +84,25 @@ const LoginPage = () => {
               placeholder="Username"
             />
 
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              className="w-full px-6 py-4 bg-stone-100 rounded-full text-gray-700 text-center placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-black/20 text-lg"
-              placeholder="Password"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                className="w-full px-6 py-4 bg-stone-100 rounded-full text-gray-700 text-center placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-black/20 text-lg"
+                placeholder="Password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none p-2"
+                tabIndex="-1"
+              >
+                {showPassword ? <FaEyeSlash className="w-5 h-5" /> : <FaEye className="w-5 h-5" />}
+              </button>
+            </div>
 
             <div className="text-right pt-2">
               <Link

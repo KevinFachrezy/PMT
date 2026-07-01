@@ -6,9 +6,9 @@ const LandingPage = () => {
       <nav className="container mx-auto px-6 py-4">
         <div className="flex justify-between items-center">
           <div className="text-2xl font-bold text-orange-600">WS PMT</div>
-          {/* <Link to="/login" className="text-gray-700 hover:text-orange-600">
+          <Link to="/login" className="text-gray-700 hover:text-orange-600">
             Login
-          </Link> */}
+          </Link>
         </div>
       </nav>
 

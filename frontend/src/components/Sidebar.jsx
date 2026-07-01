@@ -12,7 +12,10 @@ import {
   FaPlus,
   FaUsers,
   FaChartBar,
-  FaHistory
+  FaHistory,
+  FaCogs,
+  FaChevronDown,
+  FaChevronUp
 } from 'react-icons/fa'
 
 const Sidebar = () => {
@@ -35,16 +38,26 @@ const Sidebar = () => {
     { name: 'Home', path: '/dashboard', icon: FaHome },
     { name: 'Projects', path: '/projects', icon: FaFileAlt },
     { name: 'Document Center', path: '/documents', icon: FaFolder },
-    { name: 'Notifications', path: '/notifications', icon: FaBell },
     { name: 'Calender', path: '/calendar', icon: FaCalendar },
   ]
 
   // Add manager-only menu items
   if (user?.role === 'manager') {
-    menuItems.push({ name: 'Users', path: '/users', icon: FaUsers })
     menuItems.push({ name: 'Analytics', path: '/analytics', icon: FaChartBar })
-    menuItems.push({ name: 'Activity Log', path: '/activities', icon: FaHistory })
   }
+
+  // Submenu items under Administrasi
+  const adminSubItems = [
+    { name: 'Notifications', path: '/notifications', icon: FaBell }
+  ]
+
+  if (user?.role === 'manager') {
+    adminSubItems.unshift({ name: 'Users', path: '/users', icon: FaUsers })
+    adminSubItems.push({ name: 'Activity Log', path: '/activities', icon: FaHistory })
+  }
+
+  const isSubmenuActive = adminSubItems.some(item => location.pathname === item.path)
+  const [isAdminOpen, setIsAdminOpen] = useState(isSubmenuActive)
 
   const isActive = (path) => location.pathname === path
 
@@ -69,7 +82,7 @@ const Sidebar = () => {
       )}
 
       {/* Navigation Menu */}
-      <nav className="flex-1 px-4 py-2">
+      <nav className="flex-1 px-4 py-2 overflow-y-auto">
         {menuItems.map((item) => {
           const Icon = item.icon
           const active = isActive(item.path)
@@ -84,13 +97,57 @@ const Sidebar = () => {
                   : 'text-gray-300 hover:bg-gray-700 hover:text-white'
               }`}
             >
-              <div className={`p-2 rounded-lg ${active ? 'bg-orange-600' : 'bg-orange-600'}`}>
+              <div className="p-2 rounded-lg bg-orange-600">
                 <Icon className="text-white text-lg" />
               </div>
               <span className="font-medium">{item.name}</span>
             </Link>
           )
         })}
+
+        {/* Collapsible Administrasi Menu */}
+        <div className="mb-2">
+          <button
+            onClick={() => setIsAdminOpen(prev => !prev)}
+            className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors ${
+              isSubmenuActive
+                ? 'bg-gray-900 text-white font-semibold'
+                : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+            }`}
+          >
+            <div className="flex items-center space-x-3">
+              <div className="p-2 rounded-lg bg-orange-600">
+                <FaCogs className="text-white text-lg" />
+              </div>
+              <span className="font-medium">Administrasi</span>
+            </div>
+            {isAdminOpen ? <FaChevronUp className="text-white text-sm" /> : <FaChevronDown className="text-white text-sm" />}
+          </button>
+
+          {isAdminOpen && (
+            <div className="mt-2 pl-4 space-y-1">
+              {adminSubItems.map((item) => {
+                const Icon = item.icon
+                const active = isActive(item.path)
+
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors ${
+                      active
+                        ? 'bg-gray-700 text-white font-medium'
+                        : 'text-gray-400 hover:bg-gray-700 hover:text-white'
+                    }`}
+                  >
+                    <Icon className="text-white text-md" />
+                    <span className="text-sm font-medium">{item.name}</span>
+                  </Link>
+                )
+              })}
+            </div>
+          )}
+        </div>
       </nav>
 
       {/* Sign Out */}
