@@ -120,11 +120,11 @@ const EditProjectModal = ({ isOpen, onClose, project, onProjectUpdated, onProjec
     try {
       await projectService.delete(project.id)
       toast.success('Project deleted successfully')
-      
+
       if (onProjectDeleted) {
         onProjectDeleted(project.id)
       }
-      
+
       onClose()
     } catch (err) {
       console.error('Failed to delete project:', err)
@@ -257,7 +257,6 @@ const EditProjectModal = ({ isOpen, onClose, project, onProjectUpdated, onProjec
                 value={formData.start_date}
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                required
                 disabled={isSubmitting || isDeleting}
               />
             </div>
@@ -272,7 +271,6 @@ const EditProjectModal = ({ isOpen, onClose, project, onProjectUpdated, onProjec
                 value={formData.due_date}
                 onChange={handleInputChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                required
                 disabled={isSubmitting || isDeleting}
               />
             </div>
