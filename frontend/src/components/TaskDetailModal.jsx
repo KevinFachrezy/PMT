@@ -90,15 +90,14 @@ const TaskDetailModal = ({ task, isOpen, onClose, onUpdate, onDelete, isLocked =
 
   const formatDateOnly = (value) => {
     if (!value) return 'No deadline'
-    if (typeof value === 'string') {
-      if (value.includes('T')) return value.split('T')[0]
-      if (value.includes(' ')) return value.split(' ')[0]
-      return value
-    }
-
-    const date = new Date(value)
-    if (Number.isNaN(date.getTime())) return String(value)
-    return date.toISOString().split('T')[0]
+    const parsedDate = new Date(value)
+    if (Number.isNaN(parsedDate.getTime())) return String(value)
+    return parsedDate.toLocaleDateString('en-EN', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
   }
 
   return (
