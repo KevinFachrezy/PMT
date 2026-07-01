@@ -1,5 +1,4 @@
-# Setup Script untuk WS PMT
-# Menjalankan semua setup yang diperlukan
+# Setup Script for WS PMT
 
 Write-Host "========================================" -ForegroundColor Green
 Write-Host "WS PMT Initial Setup" -ForegroundColor Green

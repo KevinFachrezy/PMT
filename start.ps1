@@ -1,5 +1,5 @@
 # WS PMT Startup Script
-# Script untuk menjalankan backend dan frontend secara bersamaan
+# Script for running both frontend and backend at the same time
 
 # Get the current directory where this script is located
 $scriptDir = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition
