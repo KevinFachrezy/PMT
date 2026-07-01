@@ -252,23 +252,7 @@ const DocumentCenter = () => {
         <div className="p-8">
           <div className="flex items-center justify-between mb-8">
             <h1 className="text-4xl font-bold text-orange-600">Document Center</h1>
-            <button
-              onClick={() => setShowCalendar(!showCalendar)}
-              className={`px-6 py-3 rounded-lg font-bold transition-all flex items-center gap-2 ${showCalendar
-                ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-lg'
-                : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
-                }`}
-            >
-              <FaCalendarAlt className="text-lg" />
-              <span>{showCalendar ? 'Hide Calendar' : 'Show Calendar'}</span>
-            </button>
           </div>
-
-          {showCalendar && (
-            <div className="mb-12">
-              <CalendarView />
-            </div>
-          )}
 
           {!activeProject ? (
             <>
