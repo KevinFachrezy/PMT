@@ -136,11 +136,17 @@ const Sidebar = () => {
               </div>
               <span className="font-medium">Administration</span>
             </div>
-            {isAdminOpen ? <FaChevronUp className="text-white text-sm" /> : <FaChevronDown className="text-white text-sm" />}
+            <FaChevronDown 
+              className={`text-white text-sm transition-transform duration-300 ${isAdminOpen ? 'rotate-180' : ''}`} 
+            />
           </button>
 
-          {isAdminOpen && (
-            <div className="mt-2 pl-4 space-y-1">
+          <div
+            className={`overflow-hidden transition-all duration-300 ease-in-out ${
+              isAdminOpen ? 'max-h-48 opacity-100 mt-2' : 'max-h-0 opacity-0 mt-0'
+            }`}
+          >
+            <div className="pl-4 space-y-1">
               {adminSubItems.map((item) => {
                 const Icon = item.icon
                 const active = isActive(item.path)
@@ -160,7 +166,7 @@ const Sidebar = () => {
                 )
               })}
             </div>
-          )}
+          </div>
         </div>
       </nav>
 

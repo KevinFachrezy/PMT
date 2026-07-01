@@ -493,7 +493,6 @@ const DashboardManager = () => {
                 <option value="">All Status</option>
                 <option value="todo">To Do</option>
                 <option value="in_progress">In Progress</option>
-                <option value="review">Review</option>
                 <option value="completed">Completed</option>
               </select>
             </div>

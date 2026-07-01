@@ -152,7 +152,7 @@ const GenerateProposalModal = ({ isOpen, onClose, onSuccess }) => {
       }
 
       const blob = await templateService.generateProposal(payload)
-      
+
       const url = window.URL.createObjectURL(new Blob([blob]))
       const link = document.createElement('a')
       link.href = url
@@ -183,7 +183,7 @@ const GenerateProposalModal = ({ isOpen, onClose, onSuccess }) => {
         <div className="bg-orange-600 px-6 py-4 text-white flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <FaFileSignature className="text-2xl" />
-            <h3 className="text-xl font-bold">Generate Proposal Baru</h3>
+            <h3 className="text-xl font-bold">Generate Proposal</h3>
           </div>
           <button
             onClick={onClose}
