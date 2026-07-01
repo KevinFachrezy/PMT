@@ -26,12 +26,12 @@ const formatIndonesianDate = (dateString) => {
 const terbilangIndonesian = (num) => {
   const number = Math.floor(num)
   if (number === 0) return 'Nol'
-  
+
   const bilangan = [
     '', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima',
     'Enam', 'Tujuh', 'Delapan', 'Sembilan', 'Sepuluh', 'Sebelas'
   ]
-  
+
   const helper = (n) => {
     let temp = ''
     if (n < 12) {
@@ -55,7 +55,7 @@ const terbilangIndonesian = (num) => {
     }
     return temp
   }
-  
+
   return helper(number).trim() + ' Rupiah'
 }
 
@@ -71,15 +71,15 @@ const GenerateProposalModal = ({ isOpen, onClose, projectId, onSuccess }) => {
     tanggalRaw: new Date().toISOString().split('T')[0],
     nomor_surat_seq: '001',
     partner_code: '01',
-    perihal_proposal: 'Proposal Audit Laporan Keuangan',
+    perihal_proposal: '',
     nama_perusahaan: '',
     alamat_perusahaan: '',
     salutation: 'Bapak',
     nama_client: '',
-    jabatan: 'Direktur Utama',
+    jabatan: '',
     periode_tahun_buku: new Date().getFullYear().toString(),
     nominal_uang_raw: '50000000',
-    nominal_dalam_alphabet: 'Lima Puluh Juta Rupiah'
+    nominal_dalam_alphabet: ''
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -88,13 +88,13 @@ const GenerateProposalModal = ({ isOpen, onClose, projectId, onSuccess }) => {
     const dateObj = new Date(formData.tanggalRaw || new Date())
     const monthCode = String(dateObj.getMonth() + 1).padStart(2, '0')
     const yearCode = String(dateObj.getFullYear()).substring(2)
-    
+
     const sequenceCode = formData.nomor_surat_seq.padStart(3, '0')
     const partnerCode = formData.partner_code
-    
+
     const nomorSurat = `${sequenceCode}/01.${partnerCode}.${monthCode}${yearCode}/WS`
     const tanggalIndo = formatIndonesianDate(formData.tanggalRaw)
-    
+
     return {
       nomorSurat,
       tanggalIndo
@@ -153,7 +153,7 @@ const GenerateProposalModal = ({ isOpen, onClose, projectId, onSuccess }) => {
 
       await templateService.generateProposal(payload)
       toast.success('Proposal generated successfully')
-      
+
       if (onSuccess) {
         onSuccess()
       }
@@ -186,7 +186,7 @@ const GenerateProposalModal = ({ isOpen, onClose, projectId, onSuccess }) => {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          
+
           {/* Section 1: Meta Proyek */}
           <div className="bg-orange-50 border border-orange-100 rounded-xl p-4 space-y-4">
             <h4 className="font-bold text-orange-800 text-sm uppercase tracking-wider">File & Number Details</h4>
@@ -206,7 +206,7 @@ const GenerateProposalModal = ({ isOpen, onClose, projectId, onSuccess }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Tanggal Surat <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Letter Date <span className="text-red-500">*</span></label>
                 <input
                   type="date"
                   name="tanggalRaw"
@@ -222,7 +222,7 @@ const GenerateProposalModal = ({ isOpen, onClose, projectId, onSuccess }) => {
             {/* Auto-constructed Letter Number Generator */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">No. Urut Surat <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Reference Number <span className="text-red-500">*</span></label>
                 <input
                   type="number"
                   name="nomor_surat_seq"
@@ -237,7 +237,7 @@ const GenerateProposalModal = ({ isOpen, onClose, projectId, onSuccess }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Partner Penanda Tangan <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Partner Signee <span className="text-red-500">*</span></label>
                 <select
                   name="partner_code"
                   value={formData.partner_code}
@@ -253,7 +253,7 @@ const GenerateProposalModal = ({ isOpen, onClose, projectId, onSuccess }) => {
               </div>
 
               <div className="flex flex-col justify-end">
-                <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Preview Nomor Surat</label>
+                <label className="block text-xs font-bold text-gray-500 mb-1 uppercase">Preview</label>
                 <div className="px-4 py-2.5 bg-gray-200 border border-gray-300 rounded-lg text-gray-800 font-mono font-bold text-sm select-all flex items-center justify-between">
                   <span>{generatedData.nomorSurat}</span>
                   <FaCopy className="text-gray-400 cursor-pointer hover:text-gray-600" title="Klik untuk menyalin" onClick={() => {
@@ -268,7 +268,7 @@ const GenerateProposalModal = ({ isOpen, onClose, projectId, onSuccess }) => {
           {/* Section 2: Client Details */}
           <div className="space-y-4">
             <h4 className="font-bold text-gray-800 text-sm uppercase tracking-wider border-b pb-1">Client & Company Details</h4>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1">Company Name <span className="text-red-500">*</span></label>
@@ -285,7 +285,7 @@ const GenerateProposalModal = ({ isOpen, onClose, projectId, onSuccess }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Perihal Surat</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">About</label>
                 <input
                   type="text"
                   name="perihal_proposal"
@@ -299,7 +299,7 @@ const GenerateProposalModal = ({ isOpen, onClose, projectId, onSuccess }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Alamat Lengkap Perusahaan</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Company Address</label>
               <textarea
                 name="alamat_perusahaan"
                 value={formData.alamat_perusahaan}
@@ -357,7 +357,7 @@ const GenerateProposalModal = ({ isOpen, onClose, projectId, onSuccess }) => {
           {/* Section 3: Amount & Period */}
           <div className="space-y-4">
             <h4 className="font-bold text-gray-800 text-sm uppercase tracking-wider border-b pb-1">Contract Value & Audit Period</h4>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-1">Financial Year Period</label>
@@ -373,7 +373,7 @@ const GenerateProposalModal = ({ isOpen, onClose, projectId, onSuccess }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Fee Proposal (Angka) <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Fee Proposal (Number) <span className="text-red-500">*</span></label>
                 <input
                   type="number"
                   name="nominal_uang_raw"
@@ -391,7 +391,7 @@ const GenerateProposalModal = ({ isOpen, onClose, projectId, onSuccess }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">Terbilang (Alphabet Rupiah) <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Amount In Words (Alphabet Rupiah) <span className="text-red-500">*</span></label>
               <input
                 type="text"
                 name="nominal_dalam_alphabet"
