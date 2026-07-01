@@ -98,10 +98,18 @@ const DashboardManager = () => {
       const day = String(today.getDate()).padStart(2, '0')
       const todayStr = `${year}-${month}-${day}`
 
-      const events = loadedTasks
+      const isManager = user?.role === 'manager'
+      
+      let events = loadedTasks
         .filter(task => task?.due_date && task?.status !== 'completed')
         .filter(task => task.due_date.substring(0, 10) >= todayStr)
         .sort((a, b) => new Date(a.due_date) - new Date(b.due_date))
+
+      // Filter events for Project Handlers based on their assigned projects
+      if (!isManager) {
+        const handledProjectIds = new Set(loadedProjects.map(p => p.id))
+        events = events.filter(task => handledProjectIds.has(task.project_id))
+      }
 
       setUpcomingEvents(events)
     } catch (error) {
