@@ -73,6 +73,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('templates')->group(function () {
         Route::get('/', [DocumentTemplateController::class, 'index']);
         Route::get('/categories', [DocumentTemplateController::class, 'categories']);
+        Route::post('/generate-proposal', [DocumentTemplateController::class, 'generateProposal']);
         Route::get('/{id}', [DocumentTemplateController::class, 'show']);
         Route::post('/', [DocumentTemplateController::class, 'store']);
         Route::put('/{id}', [DocumentTemplateController::class, 'update']);
