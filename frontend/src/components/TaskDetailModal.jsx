@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
-import { FaTimes, FaEdit, FaTrash } from 'react-icons/fa'
+import { useNavigate } from 'react-router-dom'
+import { FaTimes, FaEdit, FaTrash, FaCalendarAlt } from 'react-icons/fa'
 import toast from 'react-hot-toast'
 import { taskService } from '../services'
 
 const TaskDetailModal = ({ task, isOpen, onClose, onUpdate, onDelete, isLocked = false }) => {
+  const navigate = useNavigate()
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
@@ -32,6 +34,16 @@ const TaskDetailModal = ({ task, isOpen, onClose, onUpdate, onDelete, isLocked =
   const handleInputChange = (e) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
+  }
+
+  const handleViewInCalendar = () => {
+    if (task.due_date) {
+      const dateStr = typeof task.due_date === 'string' ? task.due_date.split('T')[0].split(' ')[0] : new Date(task.due_date).toISOString().split('T')[0]
+      navigate(`/calendar?date=${dateStr}`)
+      onClose()
+    } else {
+      toast.error('Task does not have a deadline')
+    }
   }
 
   const handleSave = async () => {
@@ -116,6 +128,14 @@ const TaskDetailModal = ({ task, isOpen, onClose, onUpdate, onDelete, isLocked =
           <div className="flex items-center space-x-2">
             {!isEditing && !isLocked && (
               <>
+                <button
+                  onClick={handleViewInCalendar}
+                  className="px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-bold transition-all flex items-center gap-2"
+                  title="View In Calendar"
+                >
+                  <FaCalendarAlt className="text-white" />
+                  View In Calendar
+                </button>
                 <button
                   onClick={() => setIsEditing(true)}
                   className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
