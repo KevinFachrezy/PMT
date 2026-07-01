@@ -121,7 +121,25 @@ const CalendarPage = () => {
 
   const tasksByDate = useMemo(() => {
     const map = new Map()
-    tasks.forEach((task) => {
+
+    const groupedTasks = Object.values(tasks.reduce((acc, task) => {
+      const key = `${task.title}_${task.due_date}_${task.project_id}_${task.status}`
+      if (!acc[key]) {
+        acc[key] = {
+          ...task,
+          grouped_ids: [task.id],
+          grouped_handlers: task.assignedUser ? [task.assignedUser] : [],
+        }
+      } else {
+        acc[key].grouped_ids.push(task.id)
+        if (task.assignedUser && !acc[key].grouped_handlers.some(h => h.id === task.assignedUser.id)) {
+          acc[key].grouped_handlers.push(task.assignedUser)
+        }
+      }
+      return acc
+    }, {}))
+
+    groupedTasks.forEach((task) => {
       const key = toDateKey(task.due_date)
       if (!key) return
       const prev = map.get(key) || []

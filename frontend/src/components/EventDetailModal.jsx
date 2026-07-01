@@ -164,18 +164,31 @@ const EventDetailModal = ({ event, onClose, onRefresh }) => {
               )}
             </div>
 
-            {isTask && data?.assigned_to && (
+            {isTask && (data?.assigned_to || data?.grouped_handlers?.length > 0) && (
               <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                 <div className="flex items-center gap-2 mb-2">
                   <FaUser className="text-blue-600" />
                   <span className="font-bold text-gray-900">Assigned To</span>
                 </div>
-                <p className="text-lg font-semibold text-gray-800">
-                  {data?.assigned_user?.name || data?.assignedUser?.name || 'Unknown User'}
-                </p>
-                <p className="text-xs text-gray-600 mt-2">
-                  {data?.assigned_user?.email || data?.assignedUser?.email || 'N/A'}
-                </p>
+                {data.grouped_handlers && data.grouped_handlers.length > 0 ? (
+                  <div className="space-y-2 mt-2">
+                    {data.grouped_handlers.map(h => (
+                      <div key={h.id} className="border-b border-gray-200 last:border-0 pb-2 last:pb-0">
+                        <p className="text-lg font-semibold text-gray-800">{h.name}</p>
+                        <p className="text-xs text-gray-600">{h.email}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <>
+                    <p className="text-lg font-semibold text-gray-800">
+                      {data?.assigned_user?.name || data?.assignedUser?.name || 'Unknown User'}
+                    </p>
+                    <p className="text-xs text-gray-600 mt-2">
+                      {data?.assigned_user?.email || data?.assignedUser?.email || 'N/A'}
+                    </p>
+                  </>
+                )}
               </div>
             )}
 
