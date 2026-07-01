@@ -55,7 +55,7 @@ const CalendarPage = () => {
   const fetchData = async () => {
     try {
       setLoading(true)
-      
+
       // Fetch projects
       const projectsRes = await projectService.getAll()
       const projectsData = projectsRes.data.success ? projectsRes.data.data : projectsRes.data
@@ -80,7 +80,7 @@ const CalendarPage = () => {
       if (selectedProject) {
         params.project_id = selectedProject
       }
-      
+
       const tasksRes = await taskService.getAll(params)
       const tasksData = tasksRes.data.success ? tasksRes.data.data : tasksRes.data
       const rawTasks = Array.isArray(tasksData) ? tasksData : tasksData.data || []
@@ -92,7 +92,7 @@ const CalendarPage = () => {
       })
 
       setTasks(filteredTasks)
-      
+
     } catch (error) {
       console.error('Error fetching data:', error)
       toast.error('Failed to load calendar data')
@@ -105,15 +105,15 @@ const CalendarPage = () => {
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth()
   const monthName = currentDate.toLocaleString('default', { month: 'long' })
-  
+
   const firstDayOfMonth = new Date(year, month, 1).getDay()
   const daysInMonth = new Date(year, month + 1, 0).getDate()
-  
+
   const prevMonth = () => {
     setCurrentDate(new Date(year, month - 1, 1))
     setSelectedDateKey(null)
   }
-  
+
   const nextMonth = () => {
     setCurrentDate(new Date(year, month + 1, 1))
     setSelectedDateKey(null)
@@ -185,7 +185,7 @@ const CalendarPage = () => {
     }
 
     if (!project?.id) {
-      toast.error('Project tidak valid')
+      toast.error('Project invalid')
       return
     }
 
@@ -207,28 +207,27 @@ const CalendarPage = () => {
 
   // Generate calendar grid
   const calendarDays = []
-  
+
   // Empty cells before first day
   for (let i = 0; i < firstDayOfMonth; i++) {
     calendarDays.push(<div key={`empty-${i}`} className="p-2 min-h-[100px] bg-gray-50"></div>)
   }
-  
+
   // Days of month
   for (let day = 1; day <= daysInMonth; day++) {
     const dayItems = getItemsForDate(day)
     const totalItems = dayItems.tasks.length + dayItems.projects.length
     const dateKey = getDateKeyForDay(day)
-    const isToday = new Date().getDate() === day && 
-                    new Date().getMonth() === month && 
-                    new Date().getFullYear() === year
-    
+    const isToday = new Date().getDate() === day &&
+      new Date().getMonth() === month &&
+      new Date().getFullYear() === year
+
     calendarDays.push(
       <div
         key={day}
         onClick={() => setSelectedDateKey(dateKey)}
-        className={`p-2 min-h-[100px] border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors ${
-          isToday ? 'bg-orange-50 border-orange-300' : 'bg-white'
-        } ${selectedDateKey === dateKey ? 'ring-2 ring-orange-500' : ''}`}
+        className={`p-2 min-h-[100px] border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors ${isToday ? 'bg-orange-50 border-orange-300' : 'bg-white'
+          } ${selectedDateKey === dateKey ? 'ring-2 ring-orange-500' : ''}`}
       >
         <div className={`text-sm font-semibold mb-2 ${isToday ? 'text-orange-600' : 'text-gray-700'}`}>
           {day}
@@ -245,10 +244,10 @@ const CalendarPage = () => {
             </div>
           ))}
           {dayItems.tasks.slice(0, 2).map(task => {
-            const priorityColor = 
+            const priorityColor =
               task.priority === 'high' ? 'bg-red-500' :
-              task.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
-            
+                task.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
+
             return (
               <div
                 key={task.id}
@@ -273,10 +272,10 @@ const CalendarPage = () => {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
-      
+
       <div className="flex-1 ml-64">
         <Header />
-        
+
         <div className="p-8">
           {/* Page Header */}
           <div className="flex items-center justify-between mb-6">
@@ -284,7 +283,7 @@ const CalendarPage = () => {
               <FaCalendar className="mr-3" />
               Calendar
             </h1>
-            
+
             {/* Filter by Project */}
             <select
               value={selectedProject}
@@ -309,11 +308,11 @@ const CalendarPage = () => {
               >
                 <FaChevronLeft className="text-xl text-gray-600" />
               </button>
-              
+
               <h2 className="text-2xl font-bold text-gray-800">
                 {monthName} {year}
               </h2>
-              
+
               <button
                 onClick={nextMonth}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -355,7 +354,7 @@ const CalendarPage = () => {
               </h3>
 
               {(tasksByDate.get(selectedDateKey)?.length || 0) === 0 &&
-              (projectsByDate.get(selectedDateKey)?.length || 0) === 0 ? (
+                (projectsByDate.get(selectedDateKey)?.length || 0) === 0 ? (
                 <p className="text-gray-500 text-center py-8">No deadline scheduled for this date</p>
               ) : (
                 <div className="space-y-6">
@@ -396,18 +395,16 @@ const CalendarPage = () => {
                                 <h5 className="font-semibold text-gray-800 mb-1">{task.title}</h5>
                                 <p className="text-sm text-gray-600 mb-2">{task.description || 'No description'}</p>
                                 <div className="flex items-center space-x-3 text-xs text-gray-500">
-                                  <span className={`px-2 py-1 rounded font-semibold ${
-                                    task.priority === 'high' ? 'bg-red-100 text-red-600' :
-                                    task.priority === 'medium' ? 'bg-yellow-100 text-yellow-600' :
-                                    'bg-green-100 text-green-600'
-                                  }`}>
+                                  <span className={`px-2 py-1 rounded font-semibold ${task.priority === 'high' ? 'bg-red-100 text-red-600' :
+                                      task.priority === 'medium' ? 'bg-yellow-100 text-yellow-600' :
+                                        'bg-green-100 text-green-600'
+                                    }`}>
                                     {task.priority?.toUpperCase()}
                                   </span>
-                                  <span className={`px-2 py-1 rounded font-semibold ${
-                                    task.status === 'completed' ? 'bg-green-100 text-green-600' :
-                                    task.status === 'in_progress' ? 'bg-blue-100 text-blue-600' :
-                                    'bg-gray-100 text-gray-600'
-                                  }`}>
+                                  <span className={`px-2 py-1 rounded font-semibold ${task.status === 'completed' ? 'bg-green-100 text-green-600' :
+                                      task.status === 'in_progress' ? 'bg-blue-100 text-blue-600' :
+                                        'bg-gray-100 text-gray-600'
+                                    }`}>
                                     {task.status?.replace('_', ' ').toUpperCase()}
                                   </span>
                                   {task.project && (
