@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { useAuthStore } from '../stores/authStore'
 import CreateProjectModal from './CreateProjectModal'
+import GenerateProposalModal from './GenerateProposalModal'
 import {
   FaHome,
   FaFileAlt,
@@ -15,7 +16,8 @@ import {
   FaHistory,
   FaCogs,
   FaChevronDown,
-  FaChevronUp
+  FaChevronUp,
+  FaFileSignature
 } from 'react-icons/fa'
 
 const Sidebar = () => {
@@ -23,6 +25,7 @@ const Sidebar = () => {
   const navigate = useNavigate()
   const { logout, user } = useAuthStore()
   const [showCreateProject, setShowCreateProject] = useState(false)
+  const [showGenerateProposal, setShowGenerateProposal] = useState(false)
   const canAddProject = user?.role !== 'project_handler'
 
   const handleLogout = () => {
@@ -70,13 +73,21 @@ const Sidebar = () => {
 
       {/* Add Project Button */}
       {canAddProject && (
-        <div className="p-4">
+        <div className="p-4 space-y-3">
           <button
             onClick={() => setShowCreateProject(true)}
-            className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center space-x-2 transition-colors"
+            className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center space-x-2 transition-colors shadow-sm"
           >
             <FaPlus className="w-5 h-5" />
             <span>Add Project</span>
+          </button>
+          
+          <button
+            onClick={() => setShowGenerateProposal(true)}
+            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center space-x-2 transition-colors shadow-sm"
+          >
+            <FaFileSignature className="w-5 h-5" />
+            <span>Generate Proposal</span>
           </button>
         </div>
       )}
@@ -166,6 +177,15 @@ const Sidebar = () => {
           isOpen={showCreateProject}
           onClose={() => setShowCreateProject(false)}
           onProjectCreated={handleProjectCreated}
+        />
+      )}
+
+      {/* Generate Proposal Modal */}
+      {canAddProject && (
+        <GenerateProposalModal
+          isOpen={showGenerateProposal}
+          onClose={() => setShowGenerateProposal(false)}
+          onSuccess={() => setShowGenerateProposal(false)}
         />
       )}
     </div>

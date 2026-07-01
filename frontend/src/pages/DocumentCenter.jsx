@@ -11,7 +11,6 @@ import TemplateSelectionModal from '../components/TemplateSelectionModal'
 import TemplateFormModal from '../components/TemplateFormModal'
 import FilePreviewModal from '../components/FilePreviewModal'
 import CalendarView from '../components/CalendarView'
-import GenerateProposalModal from '../components/GenerateProposalModal'
 import { documentService, projectService } from '../services'
 import { useAuthStore } from '../stores/authStore'
 
@@ -40,7 +39,6 @@ const DocumentCenter = () => {
   const [previewDoc, setPreviewDoc] = useState(null)
   const [downloadTarget, setDownloadTarget] = useState(null)
   const [showCalendar, setShowCalendar] = useState(false)
-  const [showGenerateProposal, setShowGenerateProposal] = useState(false)
 
   useEffect(() => {
     fetchProjects()
@@ -405,16 +403,6 @@ const DocumentCenter = () => {
                   </div>
 
                   <div className="flex flex-wrap gap-3">
-                    {/* Proposal generator button — only in REPORT or Admin */}
-                    {(activeFolder === 'REPORT') && (
-                      <button
-                        onClick={() => setShowGenerateProposal(true)}
-                        className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-bold px-6 py-3 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl"
-                      >
-                        <FaFileSignature className="text-lg" />
-                        <span>Generate Proposal</span>
-                      </button>
-                    )}
                   </div>
                 </div>
               </div>
@@ -598,16 +586,6 @@ const DocumentCenter = () => {
         </div>
       )}
 
-      {/* Generate Proposal Modal */}
-      <GenerateProposalModal
-        isOpen={showGenerateProposal}
-        onClose={() => setShowGenerateProposal(false)}
-        projectId={selectedProject}
-        onSuccess={() => {
-          setShowGenerateProposal(false)
-          fetchDocuments() // reload documents list
-        }}
-      />
     </div>
   )
 }
