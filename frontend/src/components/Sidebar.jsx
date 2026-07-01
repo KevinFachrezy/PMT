@@ -77,10 +77,10 @@ const Sidebar = () => {
         <div className="p-4 pb-2">
           <button
             onClick={() => setShowCreateProject(true)}
-            className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center space-x-2 transition-colors"
+            className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2.5 px-3 rounded-lg flex items-center justify-center space-x-2 transition-colors"
           >
             <FaPlus className="w-5 h-5" />
-            <span>Add Project</span>
+            <span>Create Project</span>
           </button>
         </div>
       )}
@@ -90,7 +90,7 @@ const Sidebar = () => {
         <div className="px-4 pb-4">
           <button
             onClick={() => setShowGenerateProposal(true)}
-            className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center space-x-2 transition-colors shadow-sm"
+            className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 px-3 rounded-lg flex items-center justify-center space-x-2 transition-colors shadow-sm"
           >
             <FaFileSignature className="w-5 h-5" />
             <span>Generate Proposal</span>
@@ -99,7 +99,7 @@ const Sidebar = () => {
       )}
 
       {/* Navigation Menu */}
-      <nav className="flex-1 px-4 py-2 overflow-hidden">
+      <nav className="flex-1 px-4 py-2 overflow-y-auto custom-scrollbar-dark">
         {menuItems.map((item) => {
           const Icon = item.icon
           const active = isActive(item.path)
