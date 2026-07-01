@@ -405,9 +405,6 @@ const DashboardManager = () => {
                 <FaClock className="w-5 h-5 text-gray-600" />
                 <h2 className="text-xl font-semibold text-gray-800">Recent Projects</h2>
               </div>
-              <button className="text-gray-600 hover:text-gray-900">
-                <FaChevronRight className="w-6 h-6" />
-              </button>
             </div>
 
             {loading ? (
