@@ -6,9 +6,6 @@ const LandingPage = () => {
       <nav className="container mx-auto px-6 py-4">
         <div className="flex justify-between items-center">
           <div className="text-2xl font-bold text-orange-600">WS PMT</div>
-          <Link to="/login" className="text-gray-700 hover:text-orange-600">
-            Login
-          </Link>
         </div>
       </nav>
 
@@ -27,7 +24,7 @@ const LandingPage = () => {
 
             <Link
               to="/login"
-               className="inline-block bg-orange-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-orange-700"
+              className="inline-block bg-orange-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-orange-700"
             >
               Login
             </Link>
