@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { FaTimes } from 'react-icons/fa'
 import toast from 'react-hot-toast'
 import { projectService, userService } from '../services'
@@ -106,8 +107,8 @@ const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
     }
   }
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+  return createPortal(
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100] p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
@@ -261,7 +262,8 @@ const CreateProjectModal = ({ isOpen, onClose, onProjectCreated }) => {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 
