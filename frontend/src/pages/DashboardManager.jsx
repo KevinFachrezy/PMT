@@ -270,7 +270,7 @@ const DashboardManager = () => {
         })
       ))
 
-      toast.success('Event(s) created successfully')
+      toast.success('Event created successfully')
       setEventForm({
         title: '',
         project_id: '',

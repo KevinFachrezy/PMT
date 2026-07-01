@@ -88,7 +88,7 @@ class TaskController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'assigned_to' => 'required|exists:users,id',
-            'status' => ['required', Rule::in(['todo', 'in_progress', 'review', 'completed'])],
+            'status' => ['required', Rule::in(['todo', 'in_progress', 'review', 'completed', 'meeting_offline', 'meeting_online'])],
             'priority' => ['required', Rule::in(['low', 'medium', 'high'])],
             'due_date' => 'required|date',
         ]);
@@ -165,7 +165,7 @@ class TaskController extends Controller
             'title' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
             'assigned_to' => 'sometimes|required|exists:users,id',
-            'status' => ['sometimes', 'required', Rule::in(['todo', 'in_progress', 'review', 'completed'])],
+            'status' => ['sometimes', 'required', Rule::in(['todo', 'in_progress', 'review', 'completed', 'meeting_offline', 'meeting_online'])],
             'priority' => ['sometimes', 'required', Rule::in(['low', 'medium', 'high'])],
             'due_date' => 'sometimes|required|date',
         ]);
