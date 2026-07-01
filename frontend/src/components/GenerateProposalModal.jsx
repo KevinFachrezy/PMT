@@ -65,7 +65,7 @@ const formatRupiah = (numberString) => {
   return 'Rp ' + num.toLocaleString('id-ID')
 }
 
-const GenerateProposalModal = ({ isOpen, onClose, projectId, onSuccess }) => {
+const GenerateProposalModal = ({ isOpen, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     title: '',
     tanggalRaw: new Date().toISOString().split('T')[0],
@@ -136,7 +136,6 @@ const GenerateProposalModal = ({ isOpen, onClose, projectId, onSuccess }) => {
 
     try {
       const payload = {
-        project_id: projectId,
         title: formData.title,
         tanggal: generatedData.tanggalIndo,
         nomor_surat: generatedData.nomorSurat,
@@ -151,8 +150,18 @@ const GenerateProposalModal = ({ isOpen, onClose, projectId, onSuccess }) => {
         nominal_dalam_alphabet: formData.nominal_dalam_alphabet
       }
 
-      await templateService.generateProposal(payload)
-      toast.success('Proposal generated successfully')
+      const blob = await templateService.generateProposal(payload)
+      
+      const url = window.URL.createObjectURL(new Blob([blob]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', `${formData.title}.docx`)
+      document.body.appendChild(link)
+      link.click()
+      link.parentNode.removeChild(link)
+      window.URL.revokeObjectURL(url)
+
+      toast.success('Proposal downloaded successfully')
 
       if (onSuccess) {
         onSuccess()
