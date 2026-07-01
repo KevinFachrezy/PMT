@@ -99,7 +99,7 @@ const DashboardManager = () => {
       const todayStr = `${year}-${month}-${day}`
 
       const isManager = user?.role === 'manager'
-      
+
       let events = loadedTasks
         .filter(task => task?.due_date && task?.status !== 'completed')
         .filter(task => task.due_date.substring(0, 10) >= todayStr)
@@ -782,8 +782,8 @@ const DashboardManager = () => {
                             onChange={handleEditEventFormChange}
                             className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                           >
-                            <option value="meeting_offline">meeting - offline</option>
-                            <option value="meeting_online">meeting - online</option>
+                            <option value="meeting_offline">Meeting - Offline</option>
+                            <option value="meeting_online">Meeting - Online</option>
                           </select>
                           <div className="md:col-span-2">
                             <textarea
