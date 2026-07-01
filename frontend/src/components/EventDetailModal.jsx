@@ -171,10 +171,10 @@ const EventDetailModal = ({ event, onClose, onRefresh }) => {
                   <span className="font-bold text-gray-900">Assigned To</span>
                 </div>
                 <p className="text-lg font-semibold text-gray-800">
-                  {data?.assignedUser?.name || 'Unknown User'}
+                  {data?.assigned_user?.name || data?.assignedUser?.name || 'Unknown User'}
                 </p>
                 <p className="text-xs text-gray-600 mt-2">
-                  {data?.assignedUser?.email || 'N/A'}
+                  {data?.assigned_user?.email || data?.assignedUser?.email || 'N/A'}
                 </p>
               </div>
             )}
