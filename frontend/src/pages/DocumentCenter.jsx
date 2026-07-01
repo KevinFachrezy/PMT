@@ -129,7 +129,7 @@ const DocumentCenter = () => {
       }
       formData.append('title', uploadData.title)
       formData.append('file', uploadData.file)
-      
+
       await documentService.upload(formData)
       toast.success('Document uploaded successfully')
       setUploadData(prev => ({ ...prev, title: '', file: null }))
@@ -254,11 +254,10 @@ const DocumentCenter = () => {
             <h1 className="text-4xl font-bold text-orange-600">Document Center</h1>
             <button
               onClick={() => setShowCalendar(!showCalendar)}
-              className={`px-6 py-3 rounded-lg font-bold transition-all flex items-center gap-2 ${
-                showCalendar
-                  ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-lg'
-                  : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
-              }`}
+              className={`px-6 py-3 rounded-lg font-bold transition-all flex items-center gap-2 ${showCalendar
+                ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-lg'
+                : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
+                }`}
             >
               <FaCalendarAlt className="text-lg" />
               <span>{showCalendar ? 'Hide Calendar' : 'Show Calendar'}</span>
@@ -416,14 +415,6 @@ const DocumentCenter = () => {
                         <span>Generate Proposal</span>
                       </button>
                     )}
-
-                    <button
-                      onClick={handleOpenTemplateSelection}
-                      className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold px-6 py-3 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl"
-                    >
-                      <FaMagic className="text-lg" />
-                      <span>Gunakan Template</span>
-                    </button>
                   </div>
                 </div>
               </div>

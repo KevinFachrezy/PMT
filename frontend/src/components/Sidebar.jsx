@@ -38,7 +38,7 @@ const Sidebar = () => {
     { name: 'Home', path: '/dashboard', icon: FaHome },
     { name: 'Projects', path: '/projects', icon: FaFileAlt },
     { name: 'Document Center', path: '/documents', icon: FaFolder },
-    { name: 'Calender', path: '/calendar', icon: FaCalendar },
+    { name: 'Calendar', path: '/calendar', icon: FaCalendar },
   ]
 
   // Add manager-only menu items
@@ -92,8 +92,8 @@ const Sidebar = () => {
               key={item.path}
               to={item.path}
               className={`flex items-center space-x-3 px-4 py-3 mb-2 rounded-lg transition-colors ${active
-                  ? 'bg-gray-900 text-white'
-                  : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                ? 'bg-gray-900 text-white'
+                : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                 }`}
             >
               <div className="p-2 rounded-lg bg-orange-600">
@@ -109,8 +109,8 @@ const Sidebar = () => {
           <button
             onClick={() => setIsAdminOpen(prev => !prev)}
             className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors ${isSubmenuActive
-                ? 'bg-gray-900 text-white font-semibold'
-                : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+              ? 'bg-gray-900 text-white font-semibold'
+              : 'text-gray-300 hover:bg-gray-700 hover:text-white'
               }`}
           >
             <div className="flex items-center space-x-3">
@@ -133,8 +133,8 @@ const Sidebar = () => {
                     key={item.path}
                     to={item.path}
                     className={`flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors ${active
-                        ? 'bg-gray-700 text-white font-medium'
-                        : 'text-gray-400 hover:bg-gray-700 hover:text-white'
+                      ? 'bg-gray-700 text-white font-medium'
+                      : 'text-gray-400 hover:bg-gray-700 hover:text-white'
                       }`}
                   >
                     <Icon className="text-white text-md" />
