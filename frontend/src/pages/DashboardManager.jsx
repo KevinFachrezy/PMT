@@ -92,7 +92,7 @@ const DashboardManager = () => {
 
       const today = new Date()
       today.setHours(0, 0, 0, 0)
-      
+
       const year = today.getFullYear()
       const month = String(today.getMonth() + 1).padStart(2, '0')
       const day = String(today.getDate()).padStart(2, '0')
@@ -167,7 +167,12 @@ const DashboardManager = () => {
 
   const handleEventFormChange = (e) => {
     const { name, value } = e.target
-    setEventForm(prev => ({ ...prev, [name]: value }))
+    setEventForm(prev => {
+      if (name === 'project_id' && prev.project_id !== value) {
+        return { ...prev, [name]: value, assigned_to: [] }
+      }
+      return { ...prev, [name]: value }
+    })
   }
 
   const handleAssignedToChange = (handlerId) => {
@@ -184,7 +189,12 @@ const DashboardManager = () => {
 
   const handleEditEventFormChange = (e) => {
     const { name, value } = e.target
-    setEditEventForm(prev => ({ ...prev, [name]: value }))
+    setEditEventForm(prev => {
+      if (name === 'project_id' && prev.project_id !== value) {
+        return { ...prev, [name]: value, assigned_to: [] }
+      }
+      return { ...prev, [name]: value }
+    })
   }
 
   const handleEditAssignedToChange = (handlerId) => {
@@ -248,7 +258,7 @@ const DashboardManager = () => {
     try {
       setIsCreatingEvent(true)
 
-      await Promise.all(eventForm.assigned_to.map(handlerId => 
+      await Promise.all(eventForm.assigned_to.map(handlerId =>
         taskService.create({
           title: eventForm.title,
           description: eventForm.description,
@@ -528,17 +538,30 @@ const DashboardManager = () => {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Handler</label>
                     <div className="w-full px-4 py-2 border border-gray-300 rounded-lg max-h-[120px] overflow-y-auto space-y-2 bg-white">
-                      {handlers.map(handler => (
-                        <label key={handler.id} className="flex items-center space-x-2 cursor-pointer">
-                          <input 
-                            type="checkbox"
-                            className="rounded text-orange-600 focus:ring-orange-500"
-                            checked={(eventForm.assigned_to || []).includes(String(handler.id))}
-                            onChange={() => handleAssignedToChange(handler.id)}
-                          />
-                          <span className="text-sm text-gray-700">{handler.name}</span>
-                        </label>
-                      ))}
+                      {!eventForm.project_id ? (
+                        <span className="text-sm text-gray-500 italic">Select a project first</span>
+                      ) : (
+                        (() => {
+                          const selectedProject = projects.find(p => String(p.id) === String(eventForm.project_id))
+                          const projectHandlers = selectedProject?.handlers || []
+
+                          if (projectHandlers.length === 0) {
+                            return <span className="text-sm text-gray-500 italic">No handlers assigned to this project</span>
+                          }
+
+                          return projectHandlers.map(handler => (
+                            <label key={handler.id} className="flex items-center space-x-2 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                className="rounded text-orange-600 focus:ring-orange-500"
+                                checked={(eventForm.assigned_to || []).includes(String(handler.id))}
+                                onChange={() => handleAssignedToChange(handler.id)}
+                              />
+                              <span className="text-sm text-gray-700">{handler.name}</span>
+                            </label>
+                          ))
+                        })()
+                      )}
                     </div>
                   </div>
                   <div>
@@ -573,8 +596,8 @@ const DashboardManager = () => {
                       onChange={handleEventFormChange}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                     >
-                      <option value="meeting_offline">meeting - offline</option>
-                      <option value="meeting_online">meeting - online</option>
+                      <option value="meeting_offline">Meeting - Offline</option>
+                      <option value="meeting_online">Meeting - Online</option>
                     </select>
                   </div>
                   <div className="md:col-span-2">
@@ -714,17 +737,30 @@ const DashboardManager = () => {
                           </select>
                           <div className="w-full px-3 py-2 border border-gray-300 rounded-lg max-h-[120px] overflow-y-auto space-y-2 bg-white">
                             <span className="block text-xs text-gray-500 mb-1">Select handlers:</span>
-                            {handlers.map(handler => (
-                              <label key={handler.id} className="flex items-center space-x-2 cursor-pointer">
-                                <input 
-                                  type="checkbox"
-                                  className="rounded text-orange-600 focus:ring-orange-500"
-                                  checked={(editEventForm.assigned_to || []).includes(String(handler.id))}
-                                  onChange={() => handleEditAssignedToChange(handler.id)}
-                                />
-                                <span className="text-sm text-gray-700">{handler.name}</span>
-                              </label>
-                            ))}
+                            {!editEventForm.project_id ? (
+                              <span className="text-sm text-gray-500 italic">Select a project first</span>
+                            ) : (
+                              (() => {
+                                const selectedProject = projects.find(p => String(p.id) === String(editEventForm.project_id))
+                                const projectHandlers = selectedProject?.handlers || []
+
+                                if (projectHandlers.length === 0) {
+                                  return <span className="text-sm text-gray-500 italic">No handlers assigned to this project</span>
+                                }
+
+                                return projectHandlers.map(handler => (
+                                  <label key={handler.id} className="flex items-center space-x-2 cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      className="rounded text-orange-600 focus:ring-orange-500"
+                                      checked={(editEventForm.assigned_to || []).includes(String(handler.id))}
+                                      onChange={() => handleEditAssignedToChange(handler.id)}
+                                    />
+                                    <span className="text-sm text-gray-700">{handler.name}</span>
+                                  </label>
+                                ))
+                              })()
+                            )}
                           </div>
                           <select
                             name="priority"
